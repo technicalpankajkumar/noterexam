@@ -14,12 +14,10 @@ import React from 'react';
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 export default function ProfileScreen() {
@@ -45,36 +43,11 @@ export default function ProfileScreen() {
   };
 
   const menuItems = [
-    {
-      id: 1,
-      title: 'Edit Profile',
-      icon: Edit,
-      onPress: () => console.log('Edit Profile'),
-    },
-    {
-      id: 2,
-      title: 'Settings',
-      icon: Settings,
-      onPress: () => console.log('Settings'),
-    },
-    {
-      id: 3,
-      title: 'Notifications',
-      icon: Bell,
-      onPress: () => console.log('Notifications'),
-    },
-    {
-      id: 4,
-      title: 'Privacy & Security',
-      icon: Shield,
-      onPress: () => console.log('Privacy'),
-    },
-    {
-      id: 5,
-      title: 'Help & Support',
-      icon: HelpCircle,
-      onPress: () => console.log('Help'),
-    },
+    { id: 1, title: 'Edit Profile', icon: Edit, onPress: () => console.log('Edit Profile') },
+    { id: 2, title: 'Settings', icon: Settings, onPress: () => console.log('Settings') },
+    { id: 3, title: 'Notifications', icon: Bell, onPress: () => console.log('Notifications') },
+    { id: 4, title: 'Privacy & Security', icon: Shield, onPress: () => console.log('Privacy') },
+    { id: 5, title: 'Help & Support', icon: HelpCircle, onPress: () => console.log('Help') },
   ];
 
   const stats = [
@@ -85,213 +58,58 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <TouchableOpacity onPress={handleLogout}>
-            <LogOut size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
+    <View className="flex-1 bg-gray-100">
+      {/* Header */}
+            <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-2 bg-white border-b border-gray-200">
+              <Text className="text-2xl font-bold text-gray-800 mt-1">Profile</Text>
+              <View className="flex-row space-x-3">
+                <TouchableOpacity className="p-2" onPress={handleLogout}>
+                  <LogOut size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+            </View>
+      <ScrollView className="flex-1 mt-14" showsVerticalScrollIndicator={false}>
+        <View className="bg-white py-4 items-center mb-1">
+          <View className="relative mb-4">
             <Image
               source={{ uri: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg' }}
-              style={styles.avatar}
+              className="w-24 h-24 rounded-full"
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity className="absolute bottom-0 right-0 bg-blue-500 w-8 h-8 rounded-full justify-center items-center border-2 border-white">
               <Camera size={16} color="white" />
             </TouchableOpacity>
           </View>
-          
-          <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
-          <Text style={styles.userEmail}>{user?.email || 'user@email.com'}</Text>
-          
-          <TouchableOpacity style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
+          <Text className="text-xl font-bold text-gray-800 mb-1">{user?.name || 'User Name'}</Text>
+          <Text className="text-sm text-gray-600 mb-6">{user?.email || 'user@email.com'}</Text>
         </View>
 
-        {/* Stats Section */}
-        <View style={styles.statsSection}>
+        <View className="flex-row bg-white py-5 mb-1">
           {stats.map((stat, index) => (
-            <View key={index} style={styles.statItem}>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+            <View key={index} className="flex-1 items-center">
+              <Text className="text-xl font-bold text-gray-800 mb-1">{stat.value}</Text>
+              <Text className="text-sm text-gray-600">{stat.label}</Text>
             </View>
           ))}
         </View>
 
-        {/* Menu Items */}
-        <View style={styles.menuSection}>
+        <View className="bg-white mb-5">
           {menuItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.menuItem} onPress={item.onPress}>
-              <View style={styles.menuItemLeft}>
-                <View style={styles.menuIconContainer}>
+            <TouchableOpacity
+              key={item.id}
+              className="flex-row items-center justify-between px-5 py-4 border-b border-gray-200"
+              onPress={item.onPress}
+            >
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-blue-50 justify-center items-center mr-4">
                   <item.icon size={20} color="#4A90E2" />
                 </View>
-                <Text style={styles.menuItemText}>{item.title}</Text>
+                <Text className="text-base text-gray-800 font-medium">{item.title}</Text>
               </View>
               <ChevronRight size={20} color="#999" />
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <LogOut size={20} color="#FF6B6B" />
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-
-        <View style={styles.bottomSpacer} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    backgroundColor: '#fff',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  profileSection: {
-    backgroundColor: '#fff',
-    paddingVertical: 32,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#4A90E2',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 24,
-  },
-  editButton: {
-    backgroundColor: '#4A90E2',
-    paddingHorizontal: 32,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  editButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  statsSection: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    marginBottom: 20,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  menuSection: {
-    backgroundColor: '#fff',
-    marginBottom: 20,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  menuIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    marginHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  logoutButtonText: {
-    fontSize: 16,
-    color: '#FF6B6B',
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  bottomSpacer: {
-    height: 20,
-  },
-});

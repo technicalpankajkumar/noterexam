@@ -1,11 +1,12 @@
 import { useAuth } from '@contexts/AuthContext';
-import { Bell, Plus, Search } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Bell, FileText, Plus, Search } from 'lucide-react-native';
 import React from 'react';
 import {
+  FlatList,
   Image,
-  SafeAreaView,
   ScrollView,
-  StyleSheet,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -13,11 +14,34 @@ import {
 
 export default function HomeScreen() {
   const { user } = useAuth();
+  const router = useRouter();
+
   const quickActions = [
-    { id: 1, title: 'Create Note', icon: '📝', color: '#4A90E2' },
-    { id: 2, title: 'Join Community', icon: '👥', color: '#50C878' },
-    { id: 3, title: 'View Profile', icon: '👤', color: '#FF6B6B' },
-    { id: 4, title: 'Settings', icon: '⚙️', color: '#FFA500' },
+    { id: 1, title: 'Upload Notes', icon: '📝', color: 'bg-blue-500' },
+    { id: 2, title: 'Join Community', icon: '👥', color: 'bg-green-500' },
+  ];
+
+  const recentBooks = [
+    { id: '1', title: 'React Native Basics', uri: 'https://example.com/react-native.pdf', thumbnail: 'https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg' },
+    { id: '2', title: 'Advanced JavaScript', uri: 'https://example.com/js.pdf', thumbnail: 'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg' },
+    { id: '3', title: 'Advanced JavaScript', uri: 'https://example.com/js.pdf', thumbnail: 'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg' },
+  ];
+
+  const courseWisePDFs = [
+    {
+      course: 'Machanical',
+      files: [
+        { id: 'm1', title: 'Algebra Notes', uri: 'https://example.com/algebra.pdf', date: "12/09/2014", content: "Algebra is a branch of mathematics." },
+        { id: 'm2', title: 'Calculus Guide', uri: 'https://example.com/calculus.pdf', date: "12/09/2014", content: "Calculus is a branch of mathematics." },
+      ],
+    },
+    {
+      course: 'Computer Science',
+      files: [
+        { id: 'cs1', title: 'Data Structures', uri: 'https://example.com/ds.pdf', date: "12/09/2014", content: "Data Structure is a Body of Computer science." },
+        { id: 'cs2', title: 'Algorithms', uri: 'https://example.com/algo.pdf', date: "12/09/2014", content: "Algorithm is a set of rules to solve a problem." },
+      ],
+    },
   ];
 
   const recentActivity = [
@@ -26,67 +50,102 @@ export default function HomeScreen() {
     { id: 3, title: 'Profile updated', time: '1 day ago' },
   ];
 
+  const handleViewPDF = (uri: string, title: string) => {
+    router.push({ pathname: '/pdf-viewer', params: { uri, title } });
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>Good morning</Text>
-            <Text style={styles.userName}>{user?.name || 'User'}</Text>
-          </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Search size={24} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Bell size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
-        </View>
+    <View className="flex-1 bg-gray-100">
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-        {/* Welcome Card */}
-        <View style={styles.welcomeCard}>
-          <Image
-            source={{ uri: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg' }}
-            style={styles.welcomeImage}
-          />
-          <View style={styles.welcomeContent}>
-            <Text style={styles.welcomeTitle}>Welcome to Your App</Text>
-            <Text style={styles.welcomeDescription}>
-              Discover new features and connect with your community
-            </Text>
-            <TouchableOpacity style={styles.exploreButton}>
-              <Text style={styles.exploreButtonText}>Explore Now</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Header */}
+      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-3 bg-white border-b border-gray-200">
+        <View>
+          <Text className="text-2xl font-bold text-gray-800 mt-1">{user?.name || 'Guest'}</Text>
         </View>
+        <View className="flex-row space-x-3">
+          <TouchableOpacity className="p-2">
+            <Search size={24} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity className="p-2">
+            <Bell size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingTop: 65 }} showsVerticalScrollIndicator={false}>
         {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
+        <View className="px-3 mb-2 ">
+          <View className="flex-row flex-wrap justify-between">
             {quickActions.map((action) => (
-              <TouchableOpacity key={action.id} style={styles.quickActionCard}>
-                <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
-                  <Text style={styles.quickActionEmoji}>{action.icon}</Text>
+              <TouchableOpacity key={action.id} className="w-[47%] bg-white rounded-xl p-4 items-center mb-4 shadow">
+                <View className={`w-12 h-12 rounded-full justify-center items-center mb-3 ${action.color}`}>
+                  <Text className="text-xl">{action.icon}</Text>
                 </View>
-                <Text style={styles.quickActionTitle}>{action.title}</Text>
+                <Text className="text-sm font-medium text-center text-gray-800">{action.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
+        {/* Recent Books */}
+        <View className="px-3 mb-6">
+          <Text className="text-xl font-bold text-gray-800 mb-4">Recent Books</Text>
+          <FlatList
+            data={recentBooks}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className="w-36 bg-white rounded-xl p-2 items-center mr-4 shadow-sm"
+                onPress={() => handleViewPDF(item.uri, item.title)}
+              >
+                <Image source={{ uri: item.thumbnail }} className="w-32 h-28 rounded-lg mb-2" />
+                <Text className="text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={1}>{item.title}</Text>
+                <TouchableOpacity
+                  className=" py-1 px-4 rounded"
+                  onPress={() => handleViewPDF(item.uri, item.title)}
+                >
+                  <Text className=" underline text-sm font-semibold text-blue-500">View</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+
+        {/* Course-wise PDFs */}
+        <View className="px-3 ">
+          <Text className="text-xl font-bold text-gray-800 mb-4 bg-white rounded-md p-2">Course-Wise PDF</Text>
+          {courseWisePDFs.map((course) => (
+            <View key={course.course} className="mb-2">
+              <Text className="text-base font-bold text-blue-500 mb-2">{course.course}</Text>
+              {course.files.map((file) => (
+                <TouchableOpacity key={course.course} className="bg-white rounded-xl p-4 mb-4 shadow-sm" onPress={() => handleViewPDF(file.uri, file.title)}>
+                  <View className="flex-row justify-between items-center mb-2">
+                    <Text className="text-lg font-semibold text-gray-800 flex-1">{file.title}</Text>
+                    <Text className="text-xs text-gray-500 ml-2">{file?.date}</Text>
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-sm text-gray-600 mb-3" numberOfLines={2}>{file?.content}</Text>
+                    <FileText size={16} color="#666" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+        </View>
+
         {/* Recent Activity */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.activityList}>
+        <View className="px-3 mb-12">
+          <Text className="text-xl font-bold text-gray-800 mb-4">Recent Activity</Text>
+          <View className="bg-white rounded-xl p-4 shadow-sm">
             {recentActivity.map((activity) => (
-              <View key={activity.id} style={styles.activityItem}>
-                <View style={styles.activityDot} />
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
-                  <Text style={styles.activityTime}>{activity.time}</Text>
+              <View key={activity.id} className="flex-row items-center py-3 border-b border-gray-100">
+                <View className="w-2 h-2 rounded-full bg-blue-500 mr-4" />
+                <View className="flex-1">
+                  <Text className="text-base text-gray-800 mb-1">{activity.title}</Text>
+                  <Text className="text-sm text-gray-500">{activity.time}</Text>
                 </View>
               </View>
             ))}
@@ -95,186 +154,9 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg">
         <Plus size={24} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    backgroundColor: '#fff',
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 16,
-    color: '#666',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 4,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconButton: {
-    padding: 8,
-  },
-  welcomeCard: {
-    margin: 20,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  welcomeImage: {
-    width: '100%',
-    height: 160,
-  },
-  welcomeContent: {
-    padding: 20,
-  },
-  welcomeTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  welcomeDescription: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
-    lineHeight: 22,
-  },
-  exploreButton: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  exploreButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  quickActionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    width: '47%',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  quickActionEmoji: {
-    fontSize: 20,
-  },
-  quickActionTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
-  },
-  activityList: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  activityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4A90E2',
-    marginRight: 16,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 4,
-  },
-  activityTime: {
-    fontSize: 14,
-    color: '#666',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#4A90E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-});

@@ -1,20 +1,19 @@
+import ButtonNE from '@components/custom-ui/ButtonNE';
+import InputNE from '@components/custom-ui/InputNE';
+import PasswordInputNE from '@components/custom-ui/PasswordInputNE';
 import { useAuth } from '@contexts/AuthContext';
 import { supabase } from '@lib/supabase';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 export default function RegisterScreen() {
@@ -78,138 +77,71 @@ export default function RegisterScreen() {
       // Store additional info in profiles
       await supabase.from('auth').insert([{ id: data?.user?.id, name, email }]);
       router.push('/(auth)/verify-email');
-    }else {
+    } else {
       Alert.alert('Error', 'Registration failed');
     }
     setLoading(false);
-
-    // if (success) {
-    //   router.push('/(auth)/verify-email');
-    // } else {
-    //   Alert.alert('Error', 'Registration failed');
-    // }
   };
 
-  const handleGoogleSignUp = async () => {
-    setLoading(true);
-    // const success = await loginWithGoogle();
-    const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
-    setLoading(false);
-console.log(data, error);
-    // if (data) {
-    //   router.replace('/(tabs)');
-    // } else {
-    //   Alert.alert('Error', 'Google sign up failed');
-    // }
-  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        className="flex-1"
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ChevronLeft size={24} color="#333" />
-          </TouchableOpacity>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+          <View className="flex-1 px-6 pt-32 justify-center ">
+            <Text className="text-[30px] font-bold text-[#333] mb-2 text-center">Welcome Back</Text>
+            <Text className="text-base text-[#666] mb-8 text-center">
+              Create an account : NoterExam
+            </Text>
+            <View className="flex-1">
+              <InputNE
+                title='Name'
+                placeholder='Enter your name'
+                value={email}
+                onChangeText={(text: string) => {
+                  setName(text);
+                  setNameError('');
+                }
+                }
+                error={nameError}
+                keyboardType='numbers-and-punctuation'
+              />
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Create an account</Text>
-            <Text style={styles.subtitle}>Welcome! Please enter your details.</Text>
-
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Name</Text>
-                <TextInput
-                  style={[styles.input, nameError ? styles.inputError : null]}
-                  placeholder="Enter your name"
-                  placeholderTextColor="#999"
-                  value={name}
-                  onChangeText={(text) => {
-                    setName(text);
-                    setNameError('');
-                  }}
-                />
-                {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[styles.input, emailError ? styles.inputError : null]}
-                  placeholder="Enter your email"
-                  placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    setEmailError('');
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    style={[styles.passwordInput, passwordError ? styles.inputError : null]}
-                    placeholder="••••••••"
-                    placeholderTextColor="#999"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setPasswordError('');
-                    }}
-                    secureTextEntry={!showPassword}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff size={20} color="#999" />
-                    ) : (
-                      <Eye size={20} color="#999" />
-                    )}
-                  </TouchableOpacity>
-                </View>
-                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-                <Text style={styles.passwordHint}>Must be at least 8 characters</Text>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.signUpButton, loading && styles.signUpButtonDisabled]}
+              <InputNE
+                title='Email'
+                placeholder='Enter your email'
+                value={email}
+                onChangeText={(text: string) => {
+                  setEmail(text);
+                  setEmailError('');
+                }
+                }
+                error={emailError}
+                keyboardType='email-address'
+              />
+              <PasswordInputNE
+                value={password}
+                onChangeText={(text: string) => {
+                  setPassword(text);
+                  setPasswordError('');
+                }
+                }
+                showPassword={showPassword}
+                onShowPasswordToggle={() => setShowPassword(!showPassword)}
+                passwordError={passwordError}
+              />
+              <ButtonNE
+                loading={loading}
+                title='Sign Up'
                 onPress={handleRegister}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text style={styles.signUpButtonText}>Sign Up</Text>
-                )}
-              </TouchableOpacity>
-
-              <Text style={styles.orText}>Or sign up with</Text>
-
-              <View style={styles.socialButtons}>
-                <TouchableOpacity style={styles.socialButton}>
-                  <Text style={styles.socialButtonText}>🍎</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp}>
-                  <Text style={styles.socialButtonText}>G</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton}>
-                  <Text style={styles.socialButtonText}>f</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.loginPrompt}>
-                <Text style={styles.loginText}>Already have an account? </Text>
+              />
+              <View className="flex-row justify-center items-center">
+                <Text className="text-[#666] text-sm">Already have an account?  </Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                  <Text style={styles.loginLink}>Log in</Text>
+                  <Text className="text-[#4A90E2] text-sm font-medium">Log in</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -219,144 +151,3 @@ console.log(data, error);
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    zIndex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 120,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
-  },
-  form: {
-    flex: 1,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  inputError: {
-    borderColor: '#FF6B6B',
-  },
-  passwordContainer: {
-    position: 'relative',
-  },
-  passwordInput: {
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    paddingRight: 45,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 14,
-    top: 12,
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  passwordHint: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  signUpButton: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 24,
-    marginTop: 8,
-  },
-  signUpButtonDisabled: {
-    opacity: 0.7,
-  },
-  signUpButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  orText: {
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 24,
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 32,
-  },
-  socialButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  socialButtonText: {
-    fontSize: 20,
-  },
-  loginPrompt: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  loginLink: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});
