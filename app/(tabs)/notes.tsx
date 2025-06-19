@@ -1,4 +1,5 @@
 import InputNE from '@components/custom-ui/InputNE';
+import { RelativePathString, router } from 'expo-router';
 import { Bell, FileText } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -109,8 +110,10 @@ export default function NotesScreen() {
               <View key={note.id} className="flex-row justify-between items-center ">
                 <Text className="text-sm text-gray-800 flex-1 font-semibold">{note.title}</Text>
                 <TouchableOpacity
-                  onPress={() => { }
+                  onPress={() => { 
                     // handleViewPDF(note.uri, note.title)
+                    router.push(`/pdf/${note.id}` as RelativePathString);
+                  }
                   }
                 >
                   <FileText size={16} color="#666" />

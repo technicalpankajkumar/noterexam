@@ -1,149 +1,233 @@
+import { supabase } from '@lib/supabase';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-interface User {
+export interface Profile {
   id: string;
   email: string;
   name: string;
+  mobile: string;
+  image?: string;
+  course?: string;
+  branch?: string;
+  college?: string;
+  university?: string;
+  course_year?: string;
+  // Do not store password in context for security
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: Profile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: () => Promise<boolean>;
+  signup: (data:{name: string, email: string, password: string,mobile: string}) => Promise<{ success: boolean; error?: string }>;
+  login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  verifyEmail: (code: string) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+  verifyEmail?: (code: string) => Promise<boolean>;
+  updateProfile: (profile: Partial<Profile>) => Promise<boolean>;
+  uploadProfileImage: (fileUri: string) => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadStoredUser();
+    checkSession();
   }, []);
 
-  const loadStoredUser = async () => {
+  const checkSession = async () => {
+    setLoading(true);
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      await fetchProfile(data.session.user.id);
+    }
+    setLoading(false);
+  };
+
+  // Upload profile image to Supabase Storage
+  const uploadProfileImage = async (fileUri: string): Promise<string | null> => {
     try {
-      const storedUser = await SecureStore.getItemAsync('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
+      const response = await fetch(fileUri);
+      const blob = await response.blob();
+      const fileExt = fileUri.split('.').pop();
+      const fileName = `${user?.id}_${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('profile-images')
+        .upload(fileName, blob, { upsert: true });
+      if (error) throw error;
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(fileName);
+      return publicUrlData?.publicUrl || null;
     } catch (error) {
-      console.error('Error loading stored user:', error);
-    } finally {
+      console.error('Image upload error:', error);
+      return null;
+    }
+  };
+
+   // Update profile data in Supabase
+  const updateProfile = async (profile: Partial<Profile>): Promise<boolean> => {
+    try {
+      if (!user) return false;
+      const { error } = await supabase
+        .from('profiles')
+        .update(profile)
+        .eq('id', user.id);
+      if (error) throw error;
+      // Refresh user profile
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (fetchError) throw fetchError;
+      setUser(data);
+      await SecureStore.setItemAsync('user', JSON.stringify(data));
+      return true;
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return false;
+    }
+  };
+
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    if (data) {
+      setUser(data);
+      await SecureStore.setItemAsync('user', JSON.stringify(data));
+    } else {
+      setUser(null);
+      await SecureStore.deleteItemAsync('user');
+    }
+  };
+
+  const signup = async ({
+    email,
+    name,
+    password,
+    mobile,
+    course,
+    branch,
+    college,
+    university,
+    course_year,
+    image,
+  }: {
+    email: string;
+    name: string;
+    password: string;
+    mobile: string;
+    course?: string;
+    branch?: string;
+    college?: string;
+    university?: string;
+    course_year?: string;
+    image?: string;
+  }) => {
+    setLoading(true);
+    // Sign up with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error || !data.user) {
       setLoading(false);
+      return { success: false, error: error?.message || 'Signup failed' };
     }
-  };
-
-  const storeUser = async (userData: User) => {
-    try {
-      await SecureStore.setItemAsync('user', JSON.stringify(userData));
-      setUser(userData);
-    } catch (error) {
-      console.error('Error storing user:', error);
-    }
-  };
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful login
-      const userData: User = {
-        id: '1',
+    // Insert profile data
+    const { error: profileError } = await supabase.from('profiles').insert([
+      {
+        id: data.user.id,
         email,
-        name: 'John Doe'
-      };
-      
-      await storeUser(userData);
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
+        name,
+        mobile,
+        course,
+        branch,
+        college,
+        university,
+        course_year,
+        image,
+      },
+    ]);
+    if (profileError) {
+      setLoading(false);
+      return { success: false, error: profileError.message };
     }
+    await fetchProfile(data.user.id);
+    setLoading(false);
+    return { success: true };
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful registration
-      const userData: User = {
-        id: '1',
-        email,
-        name
-      };
-      
-      await storeUser(userData);
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
-      return false;
+  // Login with email or mobile and password
+  const login = async (identifier: string, password: string) => {
+    setLoading(true);
+    let email = identifier;
+    // If identifier is not an email, try to find email by mobile
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('mobile', identifier)
+        .single();
+      if (error || !data?.email) {
+        setLoading(false);
+        return { success: false, error: 'Mobile not found' };
+      }
+      email = data.email;
     }
-  };
-
-  const loginWithGoogle = async (): Promise<boolean> => {
-    try {
-      // Simulate Google login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userData: User = {
-        id: '1',
-        email: 'user@gmail.com',
-        name: 'Google User'
-      };
-      
-      await storeUser(userData);
-      return true;
-    } catch (error) {
-      console.error('Google login error:', error);
-      return false;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error || !data.user) {
+      setLoading(false);
+      return { success: false, error: error?.message || 'Login failed' };
     }
+    await fetchProfile(data.user.id);
+    setLoading(false);
+    return { success: true };
   };
 
   const logout = async () => {
-    try {
-      await SecureStore.deleteItemAsync('user');
-      setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    setLoading(true);
+    await supabase.auth.signOut();
+    setUser(null);
+    await SecureStore.deleteItemAsync('user');
+    setLoading(false);
   };
 
-  const verifyEmail = async (code: string): Promise<boolean> => {
-    try {
-      // Simulate email verification
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return code === '123456'; // Mock verification
-    } catch (error) {
-      console.error('Email verification error:', error);
-      return false;
+  const refreshProfile = async () => {
+    setLoading(true);
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      await fetchProfile(data.user.id);
     }
+    setLoading(false);
   };
 
   const value: AuthContextType = {
     user,
     loading,
+    signup,
+    updateProfile,
+    uploadProfileImage,
     login,
-    register,
-    loginWithGoogle,
     logout,
-    verifyEmail
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
