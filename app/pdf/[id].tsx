@@ -7,7 +7,6 @@ import { View } from 'react-native';
 const PdfById=()=> {
   const { id } = useLocalSearchParams();
   const [url,setUrl] = useState<string>('')
-console.log(url,'url')
 
 const getPdfUrlByName = async (name: string) => {
   const { data, error } = await supabase

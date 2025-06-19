@@ -30,7 +30,7 @@ export default function LoginScreen() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-  console.log(user,'user')
+
 
   const handleLogin = async () => {
     setEmailError('');
@@ -50,7 +50,6 @@ export default function LoginScreen() {
       setPasswordError('Password is required');
       return;
     }
-console.log(email,password)
    let {success} = await loginWithEmailPassword(email, password );
 
     if (success) {
