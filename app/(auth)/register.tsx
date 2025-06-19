@@ -2,7 +2,6 @@ import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
 import PasswordInputNE from '@components/custom-ui/PasswordInputNE';
 import { useAuth } from '@contexts/AuthContext';
-import { supabase } from '@lib/supabase';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -18,15 +17,16 @@ import {
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
+  const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [mobileError, setMobileError] = useState('');
 
-  const { register, loginWithGoogle } = useAuth();
+  const { signupWithEmailMobilePassword , loading} = useAuth();
   const router = useRouter();
 
   const validateEmail = (email: string) => {
@@ -42,9 +42,14 @@ export default function RegisterScreen() {
     setNameError('');
     setEmailError('');
     setPasswordError('');
+    setMobileError('')
 
     if (!name) {
       setNameError('Name is required');
+      return;
+    }
+    if (!mobile) {
+      setMobileError('Mobile is required');
       return;
     }
 
@@ -68,21 +73,20 @@ export default function RegisterScreen() {
       return;
     }
 
-    setLoading(true);
-    // const success = await register(name, email, password);
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      console.error(error)
-    } else if (data?.user) {
-      // Store additional info in profiles
-      await supabase.from('auth').insert([{ id: data?.user?.id, name, email }]);
-      router.push('/(auth)/verify-email');
+    const { success ,error} = await signupWithEmailMobilePassword({
+      email,
+      password,
+      name,
+      mobile
+    });
+    if (success) {
+      Alert.alert('Success', 'Registration successful');
+      router.push('/(tabs)')
+      // router.push('/(auth)/verify-email');
     } else {
-      Alert.alert('Error', 'Registration failed');
+      Alert.alert('Error', error);
     }
-    setLoading(false);
   };
-
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -100,7 +104,7 @@ export default function RegisterScreen() {
               <InputNE
                 title='Name'
                 placeholder='Enter your name'
-                value={email}
+                value={name}
                 onChangeText={(text: string) => {
                   setName(text);
                   setNameError('');
@@ -109,7 +113,19 @@ export default function RegisterScreen() {
                 error={nameError}
                 keyboardType='numbers-and-punctuation'
               />
-
+              <InputNE
+                title='Mobile'
+                placeholder='Enter your mobile number'
+                value={mobile}
+                onChangeText={(text: string) => {
+                  setMobile(text);
+                  setMobileError('');
+                }
+                }
+                error={mobileError}
+                keyboardType='number-pad'
+              />
+  
               <InputNE
                 title='Email'
                 placeholder='Enter your email'
@@ -129,6 +145,7 @@ export default function RegisterScreen() {
                   setPasswordError('');
                 }
                 }
+                
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
                 passwordError={passwordError}

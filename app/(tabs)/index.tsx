@@ -1,8 +1,9 @@
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Bell, FileText, Plus, Search } from 'lucide-react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   ScrollView,
@@ -11,10 +12,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { uploadPDF } from '../../utils/FileUploadHelper';
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const quickActions = [
     { id: 1, title: 'Upload Notes', icon: '📝', color: 'bg-blue-500' },
@@ -54,6 +57,15 @@ export default function HomeScreen() {
     router.push({ pathname: '/pdf-viewer', params: { uri, title } });
   };
 
+  const handleNoteUpload=async () => {
+    setUploadLoading(true)
+    const result = await uploadPDF();
+    setUploadLoading(false)
+    if (!result || result.error) alert("Upload failed");
+    else alert("PDF uploaded!");
+  }
+
+
   return (
     <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -77,14 +89,16 @@ export default function HomeScreen() {
         {/* Quick Actions */}
         <View className="px-3 mb-2 ">
           <View className="flex-row flex-wrap justify-between">
-            {quickActions.map((action) => (
-              <TouchableOpacity key={action.id} className="w-[47%] bg-white rounded-xl p-4 items-center mb-4 shadow">
+            {!uploadLoading ? quickActions.map((action) => (
+              <TouchableOpacity key={action.id} className="w-[47%] bg-white rounded-xl p-4 items-center mb-4 shadow" onPress={()=>{
+                if(action.title == 'Upload Notes') handleNoteUpload();
+                }}>
                 <View className={`w-12 h-12 rounded-full justify-center items-center mb-3 ${action.color}`}>
                   <Text className="text-xl">{action.icon}</Text>
                 </View>
                 <Text className="text-sm font-medium text-center text-gray-800">{action.title}</Text>
               </TouchableOpacity>
-            ))}
+            )) : <ActivityIndicator size="large" />}
           </View>
         </View>
 
@@ -121,7 +135,7 @@ export default function HomeScreen() {
             <View key={course.course} className="mb-2">
               <Text className="text-base font-bold text-blue-500 mb-2">{course.course}</Text>
               {course.files.map((file) => (
-                <TouchableOpacity key={course.course} className="bg-white rounded-xl p-4 mb-4 shadow-sm" onPress={() => handleViewPDF(file.uri, file.title)}>
+                <TouchableOpacity key={file.id} className="bg-white rounded-xl p-4 mb-4 shadow-sm" onPress={() => handleViewPDF(file.uri, file.title)}>
                   <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-lg font-semibold text-gray-800 flex-1">{file.title}</Text>
                     <Text className="text-xs text-gray-500 ml-2">{file?.date}</Text>

@@ -1,16 +1,39 @@
 import PDFViewer from '@components/custom-ui/PdfViewer';
+import { supabase } from '@lib/supabase';
 import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 export default function ViewPDFScreen() {
   const { id } = useLocalSearchParams();
+  const [url,setUrl] = useState<string>('')
 
-  // Here you'd fetch the PDF URL from your API using the ID
-  const pdfUrl = `'https://hjvoutpgcveoxwoextvq.supabase.co/storage/v1/object/sign/doc/WEB%20TECHNOLOGY%20Season%202024-2025.pdf%20quanttt%20(1)_compressed_compressed.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zNjg4NDlkNS1kMTVlLTQ3YjItODE0OC0zMzVjNWNiMjEyZWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2MvV0VCIFRFQ0hOT0xPR1kgU2Vhc29uIDIwMjQtMjAyNS5wZGYgcXVhbnR0dCAoMSlfY29tcHJlc3NlZF9jb21wcmVzc2VkLnBkZiIsImlhdCI6MTc1MDMwODc3MCwiZXhwIjoxNzgxODQ0NzcwfQ.RQoQDx_j9-lAg9hb0sQtHrFOfMbFbKhKRhXl_vFhuM0'`;
+
+const getPdfUrlByName = async (name: string) => {
+  const { data, error } = await supabase
+    .storage
+    .from('doc')
+    .createSignedUrl(`pdfs/${id}`, 3600); // 1 hour URL
+
+  if (error) {
+    console.error('Failed to get signed URL:', error.message);
+    return null;
+  }
+
+  return data?.signedUrl;
+};
+
+const fetchPdfUrl = async () => {
+  let url = await getPdfUrlByName(id);
+  setUrl(url);
+};
+useEffect(() => {
+  fetchPdfUrl();
+}, []);
 
   return (
     <View className="flex-1 bg-white">
-      <PDFViewer uri={pdfUrl} />
+      <PDFViewer uri={url} />
     </View>
   );
 }

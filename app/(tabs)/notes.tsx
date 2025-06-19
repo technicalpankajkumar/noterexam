@@ -1,69 +1,53 @@
 import InputNE from '@components/custom-ui/InputNE';
-import { RelativePathString, router } from 'expo-router';
+import { useIsFocused } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { Bell, FileText } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  ScrollView,
+  RefreshControl,
   StatusBar,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { getAllPdf } from '../../utils/FileUploadHelper';
 
+interface PdfFile {
+  id: string;
+  name: string;
+  created_at: string;
+}
 export default function NotesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [notes, setNotes] = useState<PdfFile[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false)
 
-  const notes = [
-    {
-      id: 1,
-      title: 'Meeting Notes',
-      content: 'Discussed project timeline and deliverables...',
-      date: '2024-01-15',
-      category: 'Work',
-    },
-    {
-      id: 2,
-      title: 'Shopping List',
-      content: 'Milk, Eggs, Bread, Apples...',
-      date: '2024-01-14',
-      category: 'Personal',
-    },
-    {
-      id: 3,
-      title: 'Book Ideas',
-      content: 'Collection of interesting book recommendations...',
-      date: '2024-01-13',
-      category: 'Reading',
-    },
-    {
-      id: 4,
-      title: 'Travel Plans',
-      content: 'Summer vacation destinations and budget...',
-      date: '2024-01-12',
-      category: 'Travel',
-    },
-  ];
+  const fetchData = async () => {
+    setLoading(true);
+    let notes = await getAllPdf();
+    setLoading(false);
+    setNotes(notes);
+  };
+  useEffect(() => {
+    fetchData();
+  }, [isFocused]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      fetchData()
+    } catch (error) {
+      console.error("Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const categories = ['All', '1st Year', '2nd Year', '3rd Year', '4th Year'];
-
-  const filteredNotes = notes.filter(note => {
-    const matchesCategory = selectedCategory === 'All' || note.category === selectedCategory;
-    const matchesSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      Work: 'bg-blue-500',
-      Personal: 'bg-green-500',
-      Reading: 'bg-red-400',
-      Travel: 'bg-orange-400',
-    };
-    return colors[category] || 'bg-gray-400';
-  };
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -103,28 +87,14 @@ export default function NotesScreen() {
         />
       </View>
       {/* Notes List */}
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 15, paddingTop: 10 }}>
-        {filteredNotes.length > 0 ? (
-          filteredNotes.map((note) => (
-            <View className='bg-white rounded-lg p-3 mb-2 shadow-sm'>
-              <View key={note.id} className="flex-row justify-between items-center ">
-                <Text className="text-sm text-gray-800 flex-1 font-semibold">{note.title}</Text>
-                <TouchableOpacity
-                  onPress={() => { 
-                    // handleViewPDF(note.uri, note.title)
-                    router.push(`/pdf/${note.id}` as RelativePathString);
-                  }
-                  }
-                >
-                  <FileText size={16} color="#666" />
-                </TouchableOpacity>
-
-              </View>
-              <Text className="text-sm text-gray-600 pt-2" numberOfLines={2}>{note.content}</Text>
-            </View>
-          ))
-
-        ) : (
+      <FlatList
+        data={notes}
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{ padding: 15, paddingTop: 10 }}
+        ListEmptyComponent={() => (
           <View className="items-center justify-center py-20">
             <FileText size={64} color="#ccc" />
             <Text className="text-xl font-bold text-gray-700 mt-4 mb-2">No notes found</Text>
@@ -133,7 +103,21 @@ export default function NotesScreen() {
             </Text>
           </View>
         )}
-      </ScrollView>
+        renderItem={({ item }) => (
+          <View className="bg-white rounded-lg p-3 mb-2 shadow-sm">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-sm text-gray-800 flex-1 font-semibold">{item.name}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push(`/pdf/${item.name}`);
+                }}
+              >
+                <FileText size={16} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }

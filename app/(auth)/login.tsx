@@ -2,7 +2,6 @@ import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
 import PasswordInputNE from '@components/custom-ui/PasswordInputNE';
 import { useAuth } from '@contexts/AuthContext';
-import { supabase } from '@lib/supabase';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -21,17 +20,17 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const { login, loginWithGoogle } = useAuth();
+  const { loginWithEmailPassword,loading,user } = useAuth();
   const router = useRouter();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+  console.log(user,'user')
 
   const handleLogin = async () => {
     setEmailError('');
@@ -51,16 +50,10 @@ export default function LoginScreen() {
       setPasswordError('Password is required');
       return;
     }
+console.log(email,password)
+   let {success} = await loginWithEmailPassword(email, password );
 
-    setLoading(true);
-    // const success = await login(email, password);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      console.error(error)
-    }
-    setLoading(false);
-
-    if (data) {
+    if (success) {
       router.replace('/(tabs)');
     } else {
       Alert.alert('Error', 'Invalid credentials');

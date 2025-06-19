@@ -27,7 +27,7 @@ export default function PasswordInputNE({
                   <Input variant="outline" size="md">
                     <InputField
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter password"
+                      placeholder="Enter your password"
                       secureTextEntry={!showPassword}
                       value={value}
                       onChangeText={onChangeText}
