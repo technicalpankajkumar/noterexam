@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { uploadPDF } from '../../utils/FileUploadHelper';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -58,11 +57,11 @@ export default function HomeScreen() {
   };
 
   const handleNoteUpload=async () => {
-    setUploadLoading(true)
-    const result = await uploadPDF();
-    setUploadLoading(false)
-    if (!result || result.error) alert("Upload failed");
-    else alert("PDF uploaded!");
+    // setUploadLoading(true)
+    // const result = await uploadPDF();
+    // setUploadLoading(false)
+    // if (!result || result.error) alert("Upload failed");
+    // else alert("PDF uploaded!");
   }
 
 

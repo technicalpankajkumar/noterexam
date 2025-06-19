@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView } from 'react-native';
 
-export default function ViewPDF() {
+const ViewPDF=()=> {
   const { name } = useLocalSearchParams(); // expects param 'name'
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
@@ -30,3 +30,5 @@ export default function ViewPDF() {
     </SafeAreaView>
   );
 }
+
+export default ViewPDF;

@@ -104,18 +104,16 @@ export default function NotesScreen() {
           </View>
         )}
         renderItem={({ item }) => (
-          <View className="bg-white rounded-lg p-3 mb-2 shadow-sm">
+              <View>
+                <TouchableOpacity className="bg-white rounded-lg p-3 mb-2 shadow-sm"  onPress={() => {
+                  router.push(`/pdf/${item.name}`);
+                }}>
             <View className="flex-row justify-between items-center">
               <Text className="text-sm text-gray-800 flex-1 font-semibold">{item.name}</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  router.push(`/pdf/${item.name}`);
-                }}
-              >
                 <FileText size={16} color="#666" />
-              </TouchableOpacity>
             </View>
-          </View>
+              </TouchableOpacity>
+              </View>
         )}
       />
     </View>

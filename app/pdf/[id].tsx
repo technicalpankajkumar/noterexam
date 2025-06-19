@@ -4,10 +4,10 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
-export default function ViewPDFScreen() {
+const PdfById=()=> {
   const { id } = useLocalSearchParams();
   const [url,setUrl] = useState<string>('')
-
+console.log(url,'url')
 
 const getPdfUrlByName = async (name: string) => {
   const { data, error } = await supabase
@@ -37,3 +37,6 @@ useEffect(() => {
     </View>
   );
 }
+
+
+export default PdfById
