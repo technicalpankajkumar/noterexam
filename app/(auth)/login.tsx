@@ -88,6 +88,7 @@ export default function LoginScreen() {
               <InputNE
                 title='Password'
                 isRequired
+                type='password'
                 value={password}
                 placeholder='Enter your password'
                 onChangeText={(text) => {
@@ -97,6 +98,7 @@ export default function LoginScreen() {
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
                 error={passwordError}
+                postfixIcon
               />
 
               <View className="flex-row justify-end items-center mb-3">

@@ -47,7 +47,7 @@ export default function InputNE({
 }: InputNEProps) {
 
   return (
-    <View className="mb-3">
+    <View className="mb-2">
       <FormControl
         isInvalid={!!error}
         size="sm"
@@ -58,7 +58,7 @@ export default function InputNE({
       >
         <FormControlLabel>
           <FormControlLabelText >
-            {title} <Text className="text-red-700">*</Text>
+            {title} {isRequired && <Text className="text-red-700">*</Text>}
           </FormControlLabelText>
         </FormControlLabel>
         <Input variant="outline" size={size} isDisabled={disabled}>
@@ -82,7 +82,7 @@ export default function InputNE({
             autoCapitalize={'none'}
             secureTextEntry={true}
           />
-          {postfixIcon && <InputSlot className="ps-2">
+          {postfixIcon && <InputSlot className="pe-2">
             {
               type == 'password' ? <Pressable onPress={() => onShowPasswordToggle?.()}>
                 <InputIcon

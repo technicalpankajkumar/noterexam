@@ -150,6 +150,7 @@ export default function RegisterScreen() {
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
                 error={passwordError}
+                postfixIcon
               />
               <ButtonNE
                 loading={loading}

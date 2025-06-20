@@ -1,23 +1,16 @@
+import { Button, ButtonText } from '@components/ui/button';
+import { Input, InputField, InputIcon } from '@components/ui/input';
 import { useAuth } from '@contexts/AuthContext';
-import {
-  Box,
-  Button,
-  ButtonText,
-  HStack,
-  Icon,
-  Input,
-  InputField,
-  Text,
-  VStack,
-} from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
   NativeSyntheticEvent,
+  Text,
   TextInput,
   TextInputKeyPressEventData,
+  View,
 } from 'react-native';
 
 export default function VerifyEmailScreen() {
@@ -62,23 +55,23 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <Box className="flex-1 bg-white px-6 pt-28">
+    <View className="flex-1 bg-white px-6 pt-28">
       {/* Back button */}
-      <Box className="absolute top-16 left-5 z-10">
+      <View className="absolute top-16 left-5 z-10">
         <Button variant="link" action="secondary" onPress={() => router.back()}>
-          <Icon as={ChevronLeft} size="lg" color="$textDark900" />
+          <InputIcon as={ChevronLeft} size="lg" color="$textDark900" />
         </Button>
-      </Box>
+      </View>
 
       {/* Content */}
-      <VStack className="flex-1 items-center space-y-6">
+      <View className="flex-1 items-center space-y-6">
         <Text className="text-[30px] font-bold text-zinc-800">Check your email</Text>
         <Text className="text-base text-zinc-500 text-center">
           We sent a verification link to sarah@cruz.com
         </Text>
 
         {/* OTP Input */}
-        <HStack className="justify-between w-full mt-6 mb-10 space-x-3">
+        <View className="justify-between w-full mt-6 mb-10 space-x-3">
           {code.map((digit, index) => (
             <Input
               key={index}
@@ -99,7 +92,7 @@ export default function VerifyEmailScreen() {
               />
             </Input>
           ))}
-        </HStack>
+        </View>
 
         {/* Verify Button */}
         <Button
@@ -115,13 +108,13 @@ export default function VerifyEmailScreen() {
         </Button>
 
         {/* Resend link */}
-        <HStack className="items-center">
+        <View className="items-center">
           <Text className="text-sm text-zinc-500">Didn't receive the email? </Text>
           <Button variant="link" onPress={() => {}}>
             <ButtonText className="text-[#4A90E2] font-medium text-sm">Click to resend</ButtonText>
           </Button>
-        </HStack>
-      </VStack>
-    </Box>
+        </View>
+      </View>
+    </View>
   );
 }
