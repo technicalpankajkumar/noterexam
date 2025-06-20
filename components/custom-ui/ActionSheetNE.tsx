@@ -1,34 +1,44 @@
-import { Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetDragIndicator, ActionsheetDragIndicatorWrapper } from "@components/ui/actionsheet";
-import React from "react";
-import { View } from "react-native";
-import UploadFileSheetNE from "./UploadFileSheetNE";
+import {
+    Actionsheet,
+    ActionsheetBackdrop,
+    ActionsheetContent,
+    ActionsheetDragIndicator,
+    ActionsheetDragIndicatorWrapper,
+} from "@components/ui/actionsheet"
+import React from "react"
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native"
 
 type actionSheetNEProps = {
     showActionsheet: boolean,
     setShowActionsheet: React.Dispatch<React.SetStateAction<boolean>>,
     handleClose: () => void,
     handleAction: () => void,
+    children: React.ReactNode
 }
 const ActionSheetNE: React.FC<actionSheetNEProps> = ({
     showActionsheet,
     setShowActionsheet,
     handleClose,
-    handleAction
+    handleAction,
+    children
 }) => {
 
-    return (
-       <View>
-      <Actionsheet isOpen={showActionsheet} onClose={handleClose} >
+    return <Actionsheet isOpen={showActionsheet} onClose={handleClose}>
         <ActionsheetBackdrop />
-        <ActionsheetContent className="w-full flex justify-start items-start">
-          <ActionsheetDragIndicatorWrapper>
-            <ActionsheetDragIndicator />
-          </ActionsheetDragIndicatorWrapper>
-         <UploadFileSheetNE/>
-        </ActionsheetContent>
-      </Actionsheet>
-      </View>
-    );
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust as needed
+        >
+            <ActionsheetContent className="pb-4 px-3">
+                <ActionsheetDragIndicatorWrapper>
+                    <ActionsheetDragIndicator />
+                </ActionsheetDragIndicatorWrapper>
+                <ScrollView showsVerticalScrollIndicator={false} className="w-full">
+                    {children}
+                </ScrollView>
+            </ActionsheetContent>
+        </KeyboardAvoidingView>
+    </Actionsheet>
 }
 
 

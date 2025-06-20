@@ -1,4 +1,5 @@
 import ActionSheetNE from '@components/custom-ui/ActionSheetNE';
+import UploadFileSheetNE from '@components/custom-ui/UploadFileSheetNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Bell, FileText, Plus, Search } from 'lucide-react-native';
@@ -71,6 +72,7 @@ export default function HomeScreen() {
 
 
   return (
+    <>
     <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
@@ -175,12 +177,13 @@ export default function HomeScreen() {
       <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg">
         <Plus size={24} color="white" />
       </TouchableOpacity>
-      {
-        showActionsheet && <View>
-          <ActionSheetNE showActionsheet={showActionsheet} setShowActionsheet={setShowActionsheet} handleClose={handleCloseActionSheetNE} handleAction={handleNoteUpload}/>
-        </View>
-      }
 
     </View>
+      {
+        showActionsheet && <View>
+          <ActionSheetNE children={<UploadFileSheetNE />} showActionsheet={showActionsheet} setShowActionsheet={setShowActionsheet} handleClose={handleCloseActionSheetNE} handleAction={handleNoteUpload}/>
+        </View>
+      }
+      </>
   );
 }
