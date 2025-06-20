@@ -1,0 +1,29 @@
+// fetch colleges of a university
+const { data: colleges } = await supabase
+  .from('colleges')
+  .select('*')
+  .eq('university_id', universityId);
+
+// fetch courses in a college
+const { data: courses } = await supabase
+  .from('courses')
+  .select('*')
+  .eq('college_id', collegeId);
+
+// fetch branches in a course
+const { data: branches } = await supabase
+  .from('branches')
+  .select('*')
+  .eq('course_id', courseId);
+
+// fetch years in a branch
+const { data: years } = await supabase
+  .from('years')
+  .select('*')
+  .eq('branch_id', branchId);
+
+// fetch semesters in a year
+const { data: semesters } = await supabase
+  .from('semesters')
+  .select('*')
+  .eq('year_id', yearId);

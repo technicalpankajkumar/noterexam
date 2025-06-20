@@ -40,3 +40,74 @@ ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'doc');
+
+/// new schema for supabase 
+
+
+create type doc_type as enum ('quantum', 'book', 'modelPaper');
+create table doc_details (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id),
+  title text not null,
+  description text,
+  type doc_type not null,
+  document_url text not null,
+  thumbnail_url text not null,  -- Path to thumbnail image in Supabase storage (e.g., 'thumbnails/xyz.jpg')
+  pdf_path text not null, 
+  university_id uuid references universities(id),
+  college_id uuid references colleges(id),
+  course_id uuid references courses(id),
+  branch_id uuid references branches(id),
+  year_id uuid references years(id),
+  semester_id uuid references semesters(id),
+  created_at timestamp default now()
+);
+
+
+-- Universities
+create table universities (
+  id uuid primary key default uuid_generate_v4(),
+  name text unique not null,
+  created_at timestamp default now()
+);
+
+-- Colleges (can be linked to a university OR self-standing)
+create table colleges (
+  id uuid primary key default uuid_generate_v4(),
+  university_id uuid references universities(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Courses
+create table courses (
+  id uuid primary key default uuid_generate_v4(),
+  college_id uuid references colleges(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Branches
+create table branches (
+  id uuid primary key default uuid_generate_v4(),
+  course_id uuid references courses(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Years (1st to 5th)
+create table years (
+  id uuid primary key default uuid_generate_v4(),
+  branch_id uuid references branches(id) on delete cascade,
+  year_number int check (year_number between 1 and 5),
+  created_at timestamp default now()
+);
+
+-- Semesters (assuming 2 per year)
+create table semesters (
+  id uuid primary key default uuid_generate_v4(),
+  year_id uuid references years(id) on delete cascade,
+  semester_number int check (semester_number between 1 and 10),
+  created_at timestamp default now()
+);
+

@@ -1,0 +1,103 @@
+You need logic like:
+
+"If university doesn't exist → create it → return ID"
+
+Here’s an example SQL function for inserting or finding a university:
+
+sql
+Copy
+Edit
+create or replace function get_or_create_university(univ_name text)
+returns uuid as $$
+declare
+  univ_id uuid;
+begin
+  select id into univ_id from universities where lower(name) = lower(univ_name);
+  if univ_id is null then
+    insert into universities(name) values (univ_name) returning id into univ_id;
+  end if;
+  return univ_id;
+end;
+$$ language plpgsql;
+Repeat similarly for:
+
+get_or_create_college(college_name text, university_id uuid)
+
+get_or_create_course(course_name text, college_id uuid)
+
+etc.
+
+
+
+//// current query
+
+Part B: One Supabase Function — Create Missing & Return All IDs
+We combine everything into one backend function: if any item doesn’t exist, it will be created and return a complete path.
+
+🔧 Function: get_or_create_academic_path
+sql
+Copy
+Edit
+create or replace function get_or_create_academic_path(
+  university_name text,
+  college_name text,
+  course_name text,
+  branch_name text,
+  year_number int,
+  semester_number int
+)
+returns table (
+  university_id uuid,
+  college_id uuid,
+  course_id uuid,
+  branch_id uuid,
+  year_id uuid,
+  semester_id uuid
+) as $$
+declare
+  u_id uuid;
+  c_id uuid;
+  crs_id uuid;
+  b_id uuid;
+  y_id uuid;
+  s_id uuid;
+begin
+  -- University
+  select id into u_id from universities where lower(name) = lower(university_name);
+  if u_id is null then
+    insert into universities(name) values (university_name) returning id into u_id;
+  end if;
+
+  -- College
+  select id into c_id from colleges where lower(name) = lower(college_name) and university_id = u_id;
+  if c_id is null then
+    insert into colleges(name, university_id) values (college_name, u_id) returning id into c_id;
+  end if;
+
+  -- Course
+  select id into crs_id from courses where lower(name) = lower(course_name) and college_id = c_id;
+  if crs_id is null then
+    insert into courses(name, college_id) values (course_name, c_id) returning id into crs_id;
+  end if;
+
+  -- Branch
+  select id into b_id from branches where lower(name) = lower(branch_name) and course_id = crs_id;
+  if b_id is null then
+    insert into branches(name, course_id) values (branch_name, crs_id) returning id into b_id;
+  end if;
+
+  -- Year
+  select id into y_id from years where year_number = year_number and branch_id = b_id;
+  if y_id is null then
+    insert into years(year_number, branch_id) values (year_number, b_id) returning id into y_id;
+  end if;
+
+  -- Semester
+  select id into s_id from semesters where semester_number = semester_number and year_id = y_id;
+  if s_id is null then
+    insert into semesters(semester_number, year_id) values (semester_number, y_id) returning id into s_id;
+  end if;
+
+  return query select u_id, c_id, crs_id, b_id, y_id, s_id;
+end;
+$$ language plpgsql;
