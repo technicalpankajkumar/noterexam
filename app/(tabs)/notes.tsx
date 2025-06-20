@@ -65,7 +65,7 @@ export default function NotesScreen() {
       <View className="px-5 pt-12  bg-white">
         <InputNE
           size='lg'
-          searchBox
+          prefixIcon
           placeholder='Search notes....'
           value={searchQuery}
           onChangeText={setSearchQuery}

@@ -2,7 +2,7 @@ import { FormControl, FormControlError, FormControlErrorIcon, FormControlErrorTe
 import { Input, InputField, InputIcon, InputSlot } from "@components/ui/input";
 import { AlertCircleIcon, Eye, EyeOff, Search } from "lucide-react-native";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import type { KeyboardTypeOptions } from "react-native";
 
@@ -53,10 +53,13 @@ export default function InputNE({
         size="sm"
         isDisabled={false}
         isReadOnly={false}
-        isRequired={isRequired}
+        isRequired={false}
+        
       >
         <FormControlLabel>
-          <FormControlLabelText>{title}</FormControlLabelText>
+          <FormControlLabelText >
+            {title} <Text className="text-red-700">*</Text>
+          </FormControlLabelText>
         </FormControlLabel>
         <Input variant="outline" size={size} isDisabled={disabled}>
           {prefixIcon && <InputSlot className="ps-2">

@@ -138,6 +138,8 @@ export default function RegisterScreen() {
                 keyboardType='email-address'
               />
               <InputNE
+                title='Password'
+                placeholder='Enter your password'
                 value={password}
                 onChangeText={(text: string) => {
                   setPassword(text);

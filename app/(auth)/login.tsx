@@ -74,6 +74,7 @@ export default function LoginScreen() {
 
             <View className="flex-1">
               <InputNE
+              isRequired
                  title='Email'
                  placeholder='Enter your email'
                   value={email}
@@ -85,7 +86,10 @@ export default function LoginScreen() {
               />
 
               <InputNE
+                title='Password'
+                isRequired
                 value={password}
+                placeholder='Enter your password'
                 onChangeText={(text) => {
                   setPassword(text);
                   setPasswordError('');
