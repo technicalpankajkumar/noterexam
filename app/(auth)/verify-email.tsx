@@ -1,23 +1,29 @@
 import { useAuth } from '@contexts/AuthContext';
+import {
+  Box,
+  Button,
+  ButtonText,
+  HStack,
+  Icon,
+  Input,
+  InputField,
+  Text,
+  VStack,
+} from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
-  SafeAreaView,
-  StyleSheet,
-  Text,
+  NativeSyntheticEvent,
   TextInput,
-  TouchableOpacity,
-  View,
+  TextInputKeyPressEventData,
 } from 'react-native';
 
 export default function VerifyEmailScreen() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<TextInput[]>([]);
-
   const { verifyEmail } = useAuth();
   const router = useRouter();
 
@@ -25,30 +31,29 @@ export default function VerifyEmailScreen() {
     const newCode = [...code];
     newCode[index] = text;
     setCode(newCode);
-
     if (text && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyPress = (key: string, index: number) => {
-    if (key === 'Backspace' && !code[index] && index > 0) {
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    index: number
+  ) => {
+    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleVerify = async () => {
     const verificationCode = code.join('');
-    
     if (verificationCode.length !== 6) {
       Alert.alert('Error', 'Please enter the complete verification code');
       return;
     }
-
     setLoading(true);
     const success = await verifyEmail(verificationCode);
     setLoading(false);
-
     if (success) {
       router.replace('/(tabs)');
     } else {
@@ -57,132 +62,66 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <ChevronLeft size={24} color="#333" />
-      </TouchableOpacity>
+    <Box className="flex-1 bg-white px-6 pt-28">
+      {/* Back button */}
+      <Box className="absolute top-16 left-5 z-10">
+        <Button variant="link" action="secondary" onPress={() => router.back()}>
+          <Icon as={ChevronLeft} size="lg" color="$textDark900" />
+        </Button>
+      </Box>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Check your email</Text>
-        <Text style={styles.subtitle}>
+      {/* Content */}
+      <VStack className="flex-1 items-center space-y-6">
+        <Text className="text-[30px] font-bold text-zinc-800">Check your email</Text>
+        <Text className="text-base text-zinc-500 text-center">
           We sent a verification link to sarah@cruz.com
         </Text>
 
-        <View style={styles.codeContainer}>
+        {/* OTP Input */}
+        <HStack className="justify-between w-full mt-6 mb-10 space-x-3">
           {code.map((digit, index) => (
-            <TextInput
+            <Input
               key={index}
-              ref={(ref) => {
-                if (ref) {
-                  inputRefs.current[index] = ref;
-                }
-              }}
-              style={styles.codeInput}
-              value={digit}
-              onChangeText={(text) => handleCodeChange(text, index)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
-              keyboardType="numeric"
-              maxLength={1}
-              textAlign="center"
-            />
+              variant="outline"
+              size="lg"
+              className="w-12 h-14 rounded-lg border border-zinc-300 text-center text-xl font-bold"
+            >
+              <InputField
+                ref={(ref) => {
+                  if (ref) inputRefs.current[index] = ref;
+                }}
+                maxLength={1}
+                keyboardType="numeric"
+                value={digit}
+                onChangeText={(text) => handleCodeChange(text, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                textAlign="center"
+              />
+            </Input>
           ))}
-        </View>
+        </HStack>
 
-        <TouchableOpacity
-          style={[styles.verifyButton, loading && styles.verifyButtonDisabled]}
+        {/* Verify Button */}
+        <Button
+          className="w-full py-4 rounded-lg bg-[#4A90E2] mb-6"
+          isDisabled={loading}
           onPress={handleVerify}
-          disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="white" />
+            <ButtonText className="text-white">Loading...</ButtonText>
           ) : (
-            <Text style={styles.verifyButtonText}>Verify email</Text>
+            <ButtonText className="text-white font-semibold">Verify email</ButtonText>
           )}
-        </TouchableOpacity>
+        </Button>
 
-        <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive the email? </Text>
-          <TouchableOpacity>
-            <Text style={styles.resendLink}>Click to resend</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+        {/* Resend link */}
+        <HStack className="items-center">
+          <Text className="text-sm text-zinc-500">Didn't receive the email? </Text>
+          <Button variant="link" onPress={() => {}}>
+            <ButtonText className="text-[#4A90E2] font-medium text-sm">Click to resend</ButtonText>
+          </Button>
+        </HStack>
+      </VStack>
+    </Box>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    zIndex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 120,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  codeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 40,
-    gap: 12,
-  },
-  codeInput: {
-    width: 48,
-    height: 56,
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
-    borderRadius: 8,
-    fontSize: 24,
-    fontWeight: 'bold',
-    backgroundColor: '#fff',
-  },
-  verifyButton: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 120,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  verifyButtonDisabled: {
-    opacity: 0.7,
-  },
-  verifyButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  resendText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  resendLink: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

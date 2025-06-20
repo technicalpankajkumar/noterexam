@@ -1,3 +1,4 @@
+import ActionSheetNE from '@components/custom-ui/ActionSheetNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Bell, FileText, Plus, Search } from 'lucide-react-native';
@@ -18,6 +19,9 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [showActionsheet,setShowActionsheet] = useState(false)
+   
+  const handleCloseActionSheetNE = () => setShowActionsheet(false);
 
   const quickActions = [
     { id: 1, title: 'Upload Notes', icon: '📝', color: 'bg-blue-500' },
@@ -91,7 +95,7 @@ export default function HomeScreen() {
           <View className="flex-row flex-wrap justify-between">
             {!uploadLoading ? quickActions.map((action) => (
               <TouchableOpacity key={action.id} className="w-[47%] bg-white rounded-xl p-4 items-center mb-4 shadow" onPress={()=>{
-                if(action.title == 'Upload Notes') handleNoteUpload();
+                if(action.title == 'Upload Notes') setShowActionsheet(true);
                 }}>
                 <View className={`w-12 h-12 rounded-full justify-center items-center mb-3 ${action.color}`}>
                   <Text className="text-xl">{action.icon}</Text>
@@ -171,6 +175,12 @@ export default function HomeScreen() {
       <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg">
         <Plus size={24} color="white" />
       </TouchableOpacity>
+      {
+        showActionsheet && <View>
+          <ActionSheetNE showActionsheet={showActionsheet} setShowActionsheet={setShowActionsheet} handleClose={handleCloseActionSheetNE} handleAction={handleNoteUpload}/>
+        </View>
+      }
+
     </View>
   );
 }

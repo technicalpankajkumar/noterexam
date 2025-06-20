@@ -28,6 +28,7 @@ interface AuthContextType {
   updateProfile: (profile: Partial<Profile>) => Promise<boolean>;
   resetPasswordWithEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
+  verifyEmail: (email: string) => Promise<{ success: boolean; error?: string ,msg?:string}>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -214,6 +215,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   };
 
+const verifyEmail = async (email: string): Promise<{ success: boolean; error?: string ,msg?:string}> => {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: 'https://your-app.com/verify',
+    },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  // Optionally, you can show an alert here if you want
+  // alert('Verification email resent.');
+  return { success: true,msg:"Verification email resent." };
+};
 
   // Provide all functions and user data globally
   const value: AuthContextType = {
@@ -229,6 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateProfile,
     resetPasswordWithEmail,
     refreshProfile,
+    verifyEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
