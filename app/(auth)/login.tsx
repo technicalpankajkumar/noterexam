@@ -1,6 +1,5 @@
 import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
-import PasswordInputNE from '@components/custom-ui/PasswordInputNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -85,7 +84,7 @@ export default function LoginScreen() {
                     error={emailError}
               />
 
-              <PasswordInputNE
+              <InputNE
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
@@ -93,7 +92,7 @@ export default function LoginScreen() {
                 }}
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
-                passwordError={passwordError}
+                error={passwordError}
               />
 
               <View className="flex-row justify-end items-center mb-3">

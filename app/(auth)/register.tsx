@@ -1,6 +1,5 @@
 import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
-import PasswordInputNE from '@components/custom-ui/PasswordInputNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -138,7 +137,7 @@ export default function RegisterScreen() {
                 error={emailError}
                 keyboardType='email-address'
               />
-              <PasswordInputNE
+              <InputNE
                 value={password}
                 onChangeText={(text: string) => {
                   setPassword(text);
@@ -148,7 +147,7 @@ export default function RegisterScreen() {
                 
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
-                passwordError={passwordError}
+                error={passwordError}
               />
               <ButtonNE
                 loading={loading}
