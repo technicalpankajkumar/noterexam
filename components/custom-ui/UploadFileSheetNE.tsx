@@ -1,5 +1,5 @@
 
-import { UploadCloud } from "lucide-react-native";
+import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -22,7 +22,7 @@ const UploadFileSheetNE = () => {
   const fields = ['university', 'course', 'branch', 'year', 'semester', 'college'];
 
 
-  return (<View className="w-full h-96">
+  return (<View className="w-full h-[450px]">
     <ScrollView showsVerticalScrollIndicator={false}>
       <Controller
         name="title"
@@ -35,7 +35,7 @@ const UploadFileSheetNE = () => {
             onChangeText={onChange}
             size="sm"
             title="Title"
-            isRequired={false}
+            isRequired={true}
             error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
           />
         )}
@@ -45,8 +45,8 @@ const UploadFileSheetNE = () => {
         name="description"
         control={control}
         rules={{ required: 'Description is required' }}
-        render={({ field: { onChange, value } }) => (
-          <TextAreaNE />
+        render={({ field: { onChange, value }, fieldState: { error } }) => (
+          <TextAreaNE isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
         )}
       />
 
@@ -54,8 +54,8 @@ const UploadFileSheetNE = () => {
         name="type"
         control={control}
         rules={{ required: 'Type is required' }}
-        render={({ field: { onChange, value } }) => (
-          <SelectNE />
+        render={({ field: { onChange, value }, fieldState: { error } }) => (
+          <SelectNE isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
         )}
       />
 
@@ -95,8 +95,8 @@ const UploadFileSheetNE = () => {
             <TouchableOpacity
               onPress={async () => {
                 const file = await selectFileNoteByDevice();
-                  onChange(file?.path);
-                }
+                onChange(file?.path);
+              }
               }
             >
               <Text className="text-sm font-medium ">Choose Notes</Text>
@@ -108,7 +108,7 @@ const UploadFileSheetNE = () => {
               </View>
             </TouchableOpacity>
             {error && (
-              <Text className="text-red-500 text-xs mt-1">{error.message}</Text>
+              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2"/> {error.message}</Text>
             )}
           </>
         )}
@@ -123,10 +123,10 @@ const UploadFileSheetNE = () => {
             <TouchableOpacity
               onPress={async () => {
                 const file = await selectImageByDevice();
-                  onChange(file?.fileName);
-                }
+                onChange(file?.fileName);
               }
-              className="mb-2"
+              }
+              className=""
             >
               <Text className="text-sm font-medium ">Choose Thumbnail</Text>
               <View className="my-2 items-center justify-center rounded-xl bg-background-50 border border-dashed border-outline-300 h-[60px] w-full">
@@ -137,7 +137,7 @@ const UploadFileSheetNE = () => {
               </View>
             </TouchableOpacity>
             {error && (
-              <Text className="text-red-500 text-xs mt-1">{error.message}</Text>
+              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2"/> {error.message}</Text>
             )}
           </>
         )}

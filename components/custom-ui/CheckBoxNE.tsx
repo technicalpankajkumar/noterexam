@@ -19,11 +19,11 @@ const CheckBoxNE: FC<CheckBoxNEProps> = ({
     onChange
 }) => {
     return (
-        <Checkbox value="" size="md" isInvalid={false} isDisabled={false}  isChecked={isChecked} onChange={onChange}>
+        <Checkbox value="" size="sm" isInvalid={false} isDisabled={false}  isChecked={isChecked} onChange={onChange}>
             <CheckboxIndicator>
                 <CheckboxIcon as={CheckIcon} />
             </CheckboxIndicator>
-            <CheckboxLabel>{title}</CheckboxLabel>
+            <CheckboxLabel className="text-sm font-medium text-blue-500 mt-1">{title}</CheckboxLabel>
         </Checkbox>
     );
 }

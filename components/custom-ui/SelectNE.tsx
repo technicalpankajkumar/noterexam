@@ -1,16 +1,19 @@
 import { FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText, FormControlHelper, FormControlHelperText, FormControlLabel, FormControlLabelText } from "@components/ui/form-control";
 import { Select, SelectBackdrop, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper, SelectIcon, SelectInput, SelectItem, SelectPortal, SelectTrigger } from "@components/ui/select";
 import { AlertCircleIcon, ChevronDownIcon } from "lucide-react-native";
+import { Text } from "react-native";
 
 interface SelectNEProps {
     errorMsg?: string;
     error?: string;
     title?: string;
+    isRequired?:boolean;
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,
     error = false,
-    title ='Choose Notes Type'
+    title ='Choose Notes Type',
+    isRequired
 }) => {
     return (
         <FormControl
@@ -23,7 +26,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
         >
             <FormControlLabel>
                 <FormControlLabelText>
-                    {title}
+                    {title} {isRequired && <Text className="text-red-700">*</Text>}
                 </FormControlLabelText>
             </FormControlLabel>
             <Select>
