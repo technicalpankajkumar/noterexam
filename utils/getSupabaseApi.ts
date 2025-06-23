@@ -2,11 +2,11 @@ import { supabase } from "@lib/supabase";
 import { Alert } from "react-native";
 
 
-export const getUniversity = async (searchTerm: string) => {
+export const getUniversity = async (searchTerm: string | null) => {
     const { data, error } = await supabase
         .from('universities')
         .select('*')
-        .ilike('name', `%${searchTerm}%`)
+        // .ilike('name', `%${searchTerm}%`)
         .order('name', { ascending: true })
         .limit(50);
 
@@ -15,11 +15,12 @@ export const getUniversity = async (searchTerm: string) => {
     }
     return data?.map((item) => ({
         label: item.name,
-        value: item.id,
+        value: item.name,
+        id:item.id
     })) || [];
 }
 
-export const getColleges = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
+export const getColleges = async ({ searchTerm, basedId }: { searchTerm: string | null, basedId: string }) => {
     const { data, error } = await supabase
         .from('colleges')
         .select('*')
@@ -33,7 +34,8 @@ export const getColleges = async ({ searchTerm, basedId }: { searchTerm: string,
     }
     return data?.map((item) => ({
         label: item.name,
-        value: item.id,
+        value: item.name,
+        id:item.id
     })) || [];
 }
 
@@ -119,26 +121,29 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
     semester_number: number,
 }) => {
 
-    const { data, error } = await supabase.rpc('get_or_create_academic_path', {
-        university_name: payload.university_name,
-        college_name: payload.college_name,
-        course_name: payload.course_name,
-        branch_name: payload.branch_name,
-        year_number: payload.year_number,
-        semester_number: payload.semester_number,
+//     const { data, error } = await supabase.rpc('find_or_create_university', {
+//   p_name: payload.university_name,
+// });
+
+// if (error) {
+//   console.error('Error:', error.message);
+// } else {
+//   console.log('University ID:', data); // UUID of existing or new university
+// }
+
+    const { data, error } = await supabase.rpc('get_or_create_full_academic_path', {
+            p_university_name: 'AKTU',
+            p_college_name: 'PIT',
+            p_course_name: 'B.Tech',
+            p_branch_name: 'CSE',
+            p_year_number: 3,
+            p_semester_number: 5
     });
 
     if (error) {
         console.error(error);
     } else {
-        return {
-            university_id: data[0].university_id,
-            college_id: data[0].college_id,
-            course_id: data[0].course_id,
-            branch_id: data[0].branch_id,
-            year_id: data[0].year_id,
-            semester_id: data[0].semester_id
-        }
+        return data;
     }
 }
 

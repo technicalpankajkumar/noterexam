@@ -9,13 +9,15 @@ interface SelectNEProps {
     title?: string;
     isRequired?:boolean;
     onChange?:()=>void;
+    options?:{id:string,label:string,value:string}[]
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,
     error = false,
     title ='Choose Notes Type',
     isRequired,
-    onChange
+    onChange,
+    options =[]
 }) => {
     return (
         <FormControl
@@ -42,9 +44,11 @@ const SelectNE: React.FC<SelectNEProps> = ({
                         <SelectDragIndicatorWrapper>
                             <SelectDragIndicator />
                         </SelectDragIndicatorWrapper>
-                        <SelectItem label="Quantum" value="quantum" />
-                        <SelectItem label="Book" value="book" />
-                        <SelectItem label="Model Paper" value="modelPaper" />
+                        {
+                            options?.map(res =>{
+                                return <SelectItem key={res.id} label={res.label} value={res.value} />
+                            })
+                        }
                     </SelectContent>
                 </SelectPortal>
             </Select>

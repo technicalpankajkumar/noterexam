@@ -188,7 +188,12 @@ export default function HomeScreen() {
     </View>
       {
         showActionsheet && <View>
-          <ActionSheetNE children={<UploadFileSheetNE />} showActionsheet={showActionsheet} setShowActionsheet={setShowActionsheet} handleClose={handleCloseActionSheetNE} handleAction={handleNoteUpload}/>
+          <ActionSheetNE 
+            children={<UploadFileSheetNE />} 
+            showActionsheet={showActionsheet} 
+            setShowActionsheet={setShowActionsheet} 
+            handleClose={handleCloseActionSheetNE}
+          />
         </View>
       }
       </>

@@ -12,14 +12,12 @@ type actionSheetNEProps = {
     showActionsheet: boolean,
     setShowActionsheet: React.Dispatch<React.SetStateAction<boolean>>,
     handleClose: () => void,
-    handleAction: () => void,
     children: React.ReactNode
 }
 const ActionSheetNE: React.FC<actionSheetNEProps> = ({
     showActionsheet,
     setShowActionsheet,
     handleClose,
-    handleAction,
     children
 }) => {
 

@@ -1,9 +1,10 @@
 
 import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
+import { getColleges, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -13,13 +14,38 @@ import TextAreaNE from "./TextAreaNE";
 
 const UploadFileSheetNE = () => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
-  const { control, handleSubmit, formState: { errors } } = useForm();
+  const { control, handleSubmit, formState: { errors },watch } = useForm();
+  const [universityData,setUniversityData] = useState<{label:string,value:string,id:string}[]>([])
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log('Form Data:', data);
+    const res = await postUniversityOrCollegeOrCourseEtc({
+                            university_name: data.university,
+                            college_name: data.college,
+                            course_name: data.course,
+                            branch_name: data.branch,
+                            year_number: Number(data.year),
+                            semester_number: Number(data.semester),
+                          })
   };
+  // console.log(watch('university')); //get value of selected university
 
-  const fields = ['university', 'course', 'branch', 'year', 'semester', 'college'];
+  const staticFn= async()=>{
+    const res = await postUniversityOrCollegeOrCourseEtc({university_name: "",college_name: "", course_name: "",branch_name: "",year_number: 0,semester_number: 0})
+  }
+  const fetchData = async () => {
+    const data = await getUniversity(null);
+    setUniversityData(data)
+  };
+  const fetchColleges =async()=>{
+    const data = await getColleges({searchTerm:null,basedId:universityData[0].id})
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fields = ['university','college', 'course', 'branch', 'year', 'semester',];
 
 
   return (<View className="w-full h-[450px]">
@@ -56,7 +82,16 @@ const UploadFileSheetNE = () => {
         control={control}
         rules={{ required: 'Type is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <SelectNE onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
+          <SelectNE 
+          options={[
+            {label:'Book',value:'book',id:'1'},
+            {label:'Model/Quantum Paper',value:'model_paper',id:'2'},
+            {label:'Notes',value:'notes',id:'3'}
+          ]}
+          onChange={onChange} 
+          isRequired 
+          error={typeof error?.message === 'string' ? error.message : undefined} 
+          />
         )}
       />
 
@@ -77,12 +112,23 @@ const UploadFileSheetNE = () => {
             name={field}
             control={control}
             rules={{ required: `${field} is required` }}
-            render={({ field: { onChange, value }, fieldState: { error } }) =>
-              fallbackFields[field] ? (
-                <InputNE placeholder={`Enter ${field}`} value={value} onChangeText={onChange} title={field} error={typeof error?.message === 'string' ? error.message : undefined} />
+            render={({ field: { onChange, value }, fieldState: { error } }) =>{
+              return fallbackFields[field] ? (
+                <InputNE 
+                  placeholder={`Enter ${field}`} 
+                  value={value} 
+                  onChangeText={onChange} 
+                  title={field} 
+                  error={typeof error?.message === 'string' ? error.message : undefined} 
+                />
               ) : (
-                <SelectNE title={field} error={typeof error?.message === 'string' ? error.message : undefined} />
-              )
+                <SelectNE 
+                  options={field == 'university' ? universityData :[]}
+                  title={field} 
+                  error={typeof error?.message === 'string' ? error.message : undefined} 
+                  onChange={onChange}
+                />
+              )}
             }
           />
         </View>
@@ -146,7 +192,8 @@ const UploadFileSheetNE = () => {
       />
 
       <ButtonNE
-        onPress={handleSubmit(onSubmit)}
+        // onPress={handleSubmit(onSubmit)}
+        onPress={staticFn}
         loading={false}
         title="Upload"
       />
