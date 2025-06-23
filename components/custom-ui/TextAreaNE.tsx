@@ -7,11 +7,13 @@ interface TextAreaNEProps{
     isRequired?:boolean
     error?:string;
     errorMsg?:string
+    onChange?:()=>void
 }
 const TextAreaNE:React.FC<TextAreaNEProps> = ({
     isRequired,
     errorMsg,
-    error
+    error,
+    onChange
 }) => {
     return (
         <FormControl size="sm" className="mb-2" isInvalid={!!error}>
@@ -26,6 +28,7 @@ const TextAreaNE:React.FC<TextAreaNEProps> = ({
                     style={{ textAlignVertical: 'top', fontSize: 12, }} // ✅ ensures cursor starts at top
                     multiline
                     placeholder="Type your book related description."
+                    onChangeText={onChange}
                 />
             </Textarea>
             {errorMsg && <FormControlHelper>

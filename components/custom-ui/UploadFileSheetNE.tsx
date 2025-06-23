@@ -31,6 +31,7 @@ const UploadFileSheetNE = () => {
         render={({ field: { onChange, value } }) => (
           <InputNE
             placeholder="Title"
+            type="text"
             value={value}
             onChangeText={onChange}
             size="sm"
@@ -46,7 +47,7 @@ const UploadFileSheetNE = () => {
         control={control}
         rules={{ required: 'Description is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextAreaNE isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
+          <TextAreaNE onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
         )}
       />
 
@@ -55,7 +56,7 @@ const UploadFileSheetNE = () => {
         control={control}
         rules={{ required: 'Type is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <SelectNE isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
+          <SelectNE onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
         )}
       />
 
@@ -75,11 +76,12 @@ const UploadFileSheetNE = () => {
           <Controller
             name={field}
             control={control}
-            render={({ field: { onChange, value } }) =>
+            rules={{ required: `${field} is required` }}
+            render={({ field: { onChange, value }, fieldState: { error } }) =>
               fallbackFields[field] ? (
-                <InputNE placeholder={`Enter ${field}`} value={value} onChangeText={onChange} title={field} />
+                <InputNE placeholder={`Enter ${field}`} value={value} onChangeText={onChange} title={field} error={typeof error?.message === 'string' ? error.message : undefined} />
               ) : (
-                <SelectNE title={field} />
+                <SelectNE title={field} error={typeof error?.message === 'string' ? error.message : undefined} />
               )
             }
           />

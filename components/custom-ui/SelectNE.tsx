@@ -8,12 +8,14 @@ interface SelectNEProps {
     error?: string;
     title?: string;
     isRequired?:boolean;
+    onChange?:()=>void;
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,
     error = false,
     title ='Choose Notes Type',
-    isRequired
+    isRequired,
+    onChange
 }) => {
     return (
         <FormControl
@@ -29,7 +31,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
                     {title} {isRequired && <Text className="text-red-700">*</Text>}
                 </FormControlLabelText>
             </FormControlLabel>
-            <Select>
+            <Select onValueChange={onChange}>
                 <SelectTrigger>
                     <SelectInput placeholder="Select option" className="flex-1 text-sm" />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />

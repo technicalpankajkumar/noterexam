@@ -80,7 +80,7 @@ export default function InputNE({
             onChangeText={onChangeText}
             keyboardType={keyboardType}
             autoCapitalize={'none'}
-            secureTextEntry={true}
+            secureTextEntry={type=='password'}
           />
           {postfixIcon && <InputSlot className="pe-2">
             {

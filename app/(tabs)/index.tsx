@@ -14,13 +14,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { uploadPDF } from '../../utils/FileUploadHelper';
+import { selectFileNoteByDevice, uploadFileServer } from '../../utils/FileUploadHelper';
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const [uploadLoading, setUploadLoading] = useState(false);
   const [showActionsheet,setShowActionsheet] = useState(false)
+  const [selectedPost, setSelectedPost] = useState<any>(null)
    
   const handleCloseActionSheetNE = () => setShowActionsheet(false);
 
@@ -62,11 +63,17 @@ export default function HomeScreen() {
     router.push({ pathname: '/pdf-viewer', params: { uri, title } });
   };
 
-  const handleNoteUpload=async () => {
-    setUploadLoading(true)
-    const result = await uploadPDF();
-    setUploadLoading(false)
-    if (!result || result.error) alert("Upload failed");
+  const handleNoteUpload = async () => {
+    setUploadLoading(true);
+    const result = await selectFileNoteByDevice();
+    if (!result || !result.success || !result.fileBuffer || !result.path) {
+      setUploadLoading(false);
+      alert("Upload failed");
+      return;
+    }
+    const data = await uploadFileServer({ path: result.path, fileBuffer: result.fileBuffer });
+    setUploadLoading(false);
+    if (!data || data.error) alert("Upload failed");
     else alert("PDF uploaded!");
   }
 
