@@ -59,10 +59,15 @@ create table doc_details (
   course_id uuid references courses(id),
   branch_id uuid references branches(id),
   year_id uuid references years(id),
-  semester_id uuid references semesters(id),
   created_at timestamp default now()
 );
 
+
+
+DROP TABLE IF EXISTS universities CASCADE;
+DROP TABLE IF EXISTS colleges CASCADE;
+DROP TABLE IF EXISTS courses CASCADE;
+DROP TABLE IF EXISTS branches CASCADE;
 
 -- Universities
 create table universities (
@@ -92,22 +97,7 @@ create table branches (
   id uuid primary key default uuid_generate_v4(),
   course_id uuid references courses(id) on delete cascade,
   name text not null,
+  year text not null,
+  semester text not null,
   created_at timestamp default now()
 );
-
--- Years (1st to 5th)
-create table years (
-  id uuid primary key default uuid_generate_v4(),
-  branch_id uuid references branches(id) on delete cascade,
-  year_number int check (year_number between 1 and 5),
-  created_at timestamp default now()
-);
-
--- Semesters (assuming 2 per year)
-create table semesters (
-  id uuid primary key default uuid_generate_v4(),
-  year_id uuid references years(id) on delete cascade,
-  semester_number int check (semester_number between 1 and 10),
-  created_at timestamp default now()
-);
-

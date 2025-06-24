@@ -24,14 +24,15 @@ const UploadFileSheetNE = () => {
                             college_name: data.college,
                             course_name: data.course,
                             branch_name: data.branch,
-                            year_number: Number(data.year),
-                            semester_number: Number(data.semester),
+                            year: data.year,
+                            semester: data.semester,
                           })
+      console.log(res,"===================")
   };
   // console.log(watch('university')); //get value of selected university
 
   const staticFn= async()=>{
-    const res = await postUniversityOrCollegeOrCourseEtc({university_name: "",college_name: "", course_name: "",branch_name: "",year_number: 0,semester_number: 0})
+    const res = await postUniversityOrCollegeOrCourseEtc({university_name: "",college_name: "", course_name: "",branch_name: "",year: '0',semester: '0'})
   }
   const fetchData = async () => {
     const data = await getUniversity(null);
@@ -192,8 +193,8 @@ const UploadFileSheetNE = () => {
       />
 
       <ButtonNE
-        // onPress={handleSubmit(onSubmit)}
-        onPress={staticFn}
+        onPress={handleSubmit(onSubmit)}
+        // onPress={staticFn}
         loading={false}
         title="Upload"
       />

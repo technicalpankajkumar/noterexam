@@ -112,42 +112,73 @@ export const getSemesters = async ({ searchTerm, basedId }: { searchTerm: string
 }
 
 
+
 export const postUniversityOrCollegeOrCourseEtc = async (payload: {
-    university_name: string,
-    college_name: string,
-    course_name: string,
-    branch_name: string,
-    year_number: number,
-    semester_number: number,
+  university_name: string,
+  college_name: string,
+  course_name: string,
+  branch_name: string,
+  year: string,
+  semester: string,
 }) => {
+  try {
+    const { university_name, college_name, course_name, branch_name, year, semester } = payload;
 
-//     const { data, error } = await supabase.rpc('find_or_create_university', {
-//   p_name: payload.university_name,
-// });
+    // 1. University
+    const { data: universityData, error: universityError } = await supabase
+      .rpc('find_or_create_university', { p_name: university_name });
 
-// if (error) {
-//   console.error('Error:', error.message);
-// } else {
-//   console.log('University ID:', data); // UUID of existing or new university
-// }
+    if (universityError || !universityData) throw new Error(universityError?.message || 'Failed to get/create university');
 
-    const { data, error } = await supabase.rpc('get_or_create_full_academic_path', {
-            p_university_name: 'AKTU',
-            p_college_name: 'PIT',
-            p_course_name: 'B.Tech',
-            p_branch_name: 'CSE',
-            p_year_number: 3,
-            p_semester_number: 5
-    });
+    const university_id = universityData;
 
-    if (error) {
-        console.error(error);
-    } else {
-        return data;
-    }
-}
+    // 2. College
+    const { data: collegeData, error: collegeError } = await supabase
+      .rpc('find_or_create_college', {
+        p_name: college_name,
+        p_university_id: university_id,
+      });
 
-export const postDocumentDetails = async (payload: {
+    if (collegeError || !collegeData) throw new Error(collegeError?.message || 'Failed to get/create college');
+
+    const college_id = collegeData;
+
+    // 3. Course
+    const { data: courseData, error: courseError } = await supabase
+      .rpc('find_or_create_course', {
+        p_name: course_name,
+        p_college_id: college_id,
+      });
+
+    if (courseError || !courseData) throw new Error(courseError?.message || 'Failed to get/create course');
+
+    const course_id = courseData;
+
+    // 4. Branch
+    const { data: branchData, error: branchError } = await supabase
+      .rpc('find_or_create_branch', {
+        p_name: branch_name,
+        p_year: year,
+        p_semester: semester,
+        p_course_id: course_id,
+      });
+
+    if (branchError || !branchData) throw new Error(branchError?.message || 'Failed to get/create branch');
+
+    return {
+      university_id,
+      college_id,
+      course_id,
+      branch_id: branchData,
+    };
+  } catch (err: any) {
+    console.error('Error in post university or college or course etc:', err.message);
+    return { error: err.message };
+  }
+};
+
+
+export const postDocDetails = async (payload: {
     user_id: string,
     title: string,
     description: string,
