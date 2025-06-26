@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
-import { getColleges, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+import { getBranches, getColleges, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -31,16 +31,22 @@ const UploadFileSheetNE = () => {
   };
   // console.log(watch('university')); //get value of selected university
 
-  const staticFn= async()=>{
-    const res = await postUniversityOrCollegeOrCourseEtc({university_name: "",college_name: "", course_name: "",branch_name: "",year: '0',semester: '0'})
-  }
   const fetchData = async () => {
     const data = await getUniversity(null);
     setUniversityData(data)
   };
   const fetchColleges =async()=>{
-    const data = await getColleges({searchTerm:null,basedId:universityData[0].id})
+    const data= await getColleges({
+      searchTerm:null,
+      universityId:universityData[0].id
+    })
   }
+  const fetchBranches =async()=>{
+    const data= await getBranches({
+      courseId: universityData[0].id
+    })
+  }
+
 
   useEffect(() => {
     fetchData();

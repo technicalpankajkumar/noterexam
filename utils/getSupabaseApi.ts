@@ -2,13 +2,19 @@ import { supabase } from "@lib/supabase";
 import { Alert } from "react-native";
 
 
+const handleQuery = ({ query, searchTerm }: { query: any; searchTerm?: string | null }) => {
+
+    if (searchTerm?.trim()) {
+      query = query.ilike("name", `%${searchTerm.trim()}%`);
+    }
+}
+
 export const getUniversity = async (searchTerm: string | null) => {
-    const { data, error } = await supabase
-        .from('universities')
-        .select('*')
-        // .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+    let query = supabase.from('universities').select('*').order('name', { ascending: true }).limit(50);
+    
+    handleQuery({query,searchTerm})
+
+    const { data, error } = await query;
 
     if (error) {
         Alert.alert("University fetching error!")
@@ -20,33 +26,32 @@ export const getUniversity = async (searchTerm: string | null) => {
     })) || [];
 }
 
-export const getColleges = async ({ searchTerm, basedId }: { searchTerm: string | null, basedId: string }) => {
-    const { data, error } = await supabase
-        .from('colleges')
-        .select('*')
-        .eq('university_id', basedId)
-        .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: string | null; universityId: string; }) => {
+  let query = supabase.from("colleges").select("*").eq("university_id", universityId).order("name", { ascending: true }).limit(50);
 
-    if (error) {
-        Alert.alert("Colleges fetching error!")
-    }
-    return data?.map((item) => ({
-        label: item.name,
-        value: item.name,
-        id:item.id
-    })) || [];
-}
+  handleQuery({query,searchTerm})
+  const { data, error } = await query;
 
-export const getCourses = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-    const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('college_id', basedId)
-        .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+  if (error) {
+    Alert.alert("Colleges fetching error!", error.message);
+    return [];
+  }
+
+  return (
+    data?.map((item) => ({
+      label: item.name,
+      value: item.name,
+      id: item.id,
+    })) || []
+  );
+};
+
+
+export const getCourses = async ({ searchTerm, collegeId }: { searchTerm: string, collegeId: string }) => {
+    const query = supabase.from('courses').select('*').eq('college_id', collegeId).order('name', { ascending: true }).limit(50);
+
+    handleQuery({query,searchTerm});
+    const { data, error } = await query;
 
     if (error) {
         Alert.alert("Course fetching error!")
@@ -57,14 +62,11 @@ export const getCourses = async ({ searchTerm, basedId }: { searchTerm: string, 
     })) || [];
 }
 
-export const getBranches = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-    const { data, error } = await supabase
-        .from('branches')
-        .select('*')
-        .eq('course_id', basedId)
-        .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+export const getBranches = async ({ searchTerm, courseId }: { searchTerm?: string, courseId: string }) => {
+    const query = supabase.from('branches').select('*').eq('course_id', courseId).order('name', { ascending: true }).limit(50);
+
+     handleQuery({query,searchTerm});
+    const { data, error } = await query;
 
     if (error) {
         Alert.alert("Branches fetching error!")
@@ -75,41 +77,41 @@ export const getBranches = async ({ searchTerm, basedId }: { searchTerm: string,
     })) || [];
 }
 
-export const getYears = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-    const { data, error } = await supabase
-        .from('years')
-        .select('*')
-        .eq('branch_id', basedId)
-        .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+// export const getYears = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
+//     const { data, error } = await supabase
+//         .from('years')
+//         .select('*')
+//         .eq('branch_id', basedId)
+//         .ilike('name', `%${searchTerm}%`)
+//         .order('name', { ascending: true })
+//         .limit(50);
 
-    if (error) {
-        Alert.alert("Years fetching error!")
-    }
-    return data?.map((item) => ({
-        label: item.name,
-        value: item.id,
-    })) || [];
-}
+//     if (error) {
+//         Alert.alert("Years fetching error!")
+//     }
+//     return data?.map((item) => ({
+//         label: item.name,
+//         value: item.id,
+//     })) || [];
+// }
 
-export const getSemesters = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-    const { data, error } = await supabase
-        .from('semesters')
-        .select('*')
-        .eq('year_id', basedId)
-        .ilike('name', `%${searchTerm}%`)
-        .order('name', { ascending: true })
-        .limit(50);
+// export const getSemesters = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
+//     const { data, error } = await supabase
+//         .from('semesters')
+//         .select('*')
+//         .eq('year_id', basedId)
+//         .ilike('name', `%${searchTerm}%`)
+//         .order('name', { ascending: true })
+//         .limit(50);
 
-    if (error) {
-        Alert.alert("Semesters fetching error!")
-    }
-    return data?.map((item) => ({
-        label: item.name,
-        value: item.id,
-    })) || [];
-}
+//     if (error) {
+//         Alert.alert("Semesters fetching error!")
+//     }
+//     return data?.map((item) => ({
+//         label: item.name,
+//         value: item.id,
+//     })) || [];
+// }
 
 
 
