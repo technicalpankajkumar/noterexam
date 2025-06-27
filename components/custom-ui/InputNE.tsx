@@ -76,11 +76,10 @@ export default function InputNE({
           <InputField
             placeholder={placeholder}
             value={value}
-            type={type}
+            type={type == 'password' ? showPassword ? 'text' : 'password' : type}
             onChangeText={onChangeText}
             keyboardType={keyboardType}
             autoCapitalize={'none'}
-            secureTextEntry={type=='password'}
           />
           {postfixIcon && <InputSlot className="pe-2">
             {

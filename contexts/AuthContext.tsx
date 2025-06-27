@@ -136,7 +136,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     let lowercaseEmail=email.toLowerCase();
     const { data, error } = await supabase.auth.signUp({ email:lowercaseEmail, password });
-
     if (error || !data.user) {
       setLoading(false);
       return { success: false, error: error?.message || 'Signup failed' };

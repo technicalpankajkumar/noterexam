@@ -7,9 +7,9 @@ interface SelectNEProps {
     errorMsg?: string;
     error?: string;
     title?: string;
-    isRequired?:boolean;
-    onChange?:()=>void;
-    options?:{id:string,label:string,value:string}[]
+    isRequired?: boolean;
+    onChange?: (e: any) => void;
+    options?: { id: string, label: string, value: string }[]
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,

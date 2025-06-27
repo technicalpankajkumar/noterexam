@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
-import { getBranches, getColleges, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+import { getBranches, getColleges, getCourses, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -14,20 +14,23 @@ import TextAreaNE from "./TextAreaNE";
 
 const UploadFileSheetNE = () => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
-  const { control, handleSubmit, formState: { errors },watch } = useForm();
-  const [universityData,setUniversityData] = useState<{label:string,value:string,id:string}[]>([])
+  const { control, handleSubmit, formState: { errors }, watch } = useForm();
+  const [universityData, setUniversityData] = useState<{ label: string, value: string, id: string }[]>([])
+  const [collegeData, setCollegeData] = useState<{ label: string, value: string, id: string }[]>([]);
+  const [courseData, setCourseData] = useState<{ label: string, value: string, id: string }[]>([]);
+  const [branchData, setBranchData] = useState<{ label: string, value: string, id: string }[]>([]);
 
   const onSubmit = async (data: any) => {
     console.log('Form Data:', data);
     const res = await postUniversityOrCollegeOrCourseEtc({
-                            university_name: data.university,
-                            college_name: data.college,
-                            course_name: data.course,
-                            branch_name: data.branch,
-                            year: data.year,
-                            semester: data.semester,
-                          })
-      console.log(res,"===================")
+      university_name: data.university,
+      college_name: data.college,
+      course_name: data.course,
+      branch_name: data.branch,
+      year: data.year,
+      semester: data.semester,
+    })
+    console.log(res, "===================");
   };
   // console.log(watch('university')); //get value of selected university
 
@@ -35,24 +38,78 @@ const UploadFileSheetNE = () => {
     const data = await getUniversity(null);
     setUniversityData(data)
   };
-  const fetchColleges =async()=>{
-    const data= await getColleges({
-      searchTerm:null,
-      universityId:universityData[0].id
+  const fetchColleges = async (universityId: string) => {
+    const data = await getColleges({
+      searchTerm: null,
+      universityId
     })
+    setCollegeData(data)
   }
-  const fetchBranches =async()=>{
-    const data= await getBranches({
-      courseId: universityData[0].id
+  const fetchCourse = async (collegeId: string) => {
+    const data = await getCourses({
+      collegeId
     })
+    setCourseData(data)
   }
+  const fetchBranches = async (courseId: string) => {
+    const data = await getBranches({
+      courseId
+    })
+    setBranchData(data)
+  }
+
 
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fields = ['university','college', 'course', 'branch', 'year', 'semester',];
+  const fields = ['university', 'college', 'course', 'branch', 'year', 'semester',];
+  const yearData = [
+    { label: '1st Year', value: '1', id: '1' },
+    { label: '2nd Year', value: '2', id: '2' },
+    { label: '3rd Year', value: '3', id: '3' },
+    { label: '4th Year', value: '4', id: '4' },
+    { label: '5th Year', value: '5', id: '5' },
+  ];
+  const semesterData = [
+    { label: '1st Semester', value: '1', id: '1' },
+    { label: '2nd Semester', value: '2', id: '2' },
+    { label: '3rd Semester', value: '3', id: '3' },
+    { label: '4th Semester', value: '4', id: '4' },
+    { label: '5th Semester', value: '5', id: '5' },
+    { label: '6th Semester', value: '6', id: '6' },
+  ];
+  const returnFieldWiseList = (field: string) => {
+    switch (field) {
+      case 'university':
+        return universityData;
+      case 'college':
+        return collegeData;
+      case 'course':
+        return courseData;
+      case 'branch':
+        return branchData;
+      case 'year':
+        return yearData;
+      case 'semester':
+        return semesterData;
+      default:
+        return [];
+    }
+  }
+  const listApiCall = (field: string, e: any) => {
+    console.log(e,'=========')
+    if (field == 'university') {
+      fetchColleges(e.value)
+    }
+    else if (field == 'college') {
+      fetchCourse(e.value)
+    }
+    else if (field == 'course') {
+      fetchBranches(e.value)
+    }
+  }
 
 
   return (<View className="w-full h-[450px]">
@@ -89,15 +146,15 @@ const UploadFileSheetNE = () => {
         control={control}
         rules={{ required: 'Type is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <SelectNE 
-          options={[
-            {label:'Book',value:'book',id:'1'},
-            {label:'Model/Quantum Paper',value:'model_paper',id:'2'},
-            {label:'Notes',value:'notes',id:'3'}
-          ]}
-          onChange={onChange} 
-          isRequired 
-          error={typeof error?.message === 'string' ? error.message : undefined} 
+          <SelectNE
+            options={[
+              { label: 'Book', value: 'book', id: '1' },
+              { label: 'Model/Quantum Paper', value: 'model_paper', id: '2' },
+              { label: 'Notes', value: 'notes', id: '3' }
+            ]}
+            onChange={onChange}
+            isRequired
+            error={typeof error?.message === 'string' ? error.message : undefined}
           />
         )}
       />
@@ -119,23 +176,27 @@ const UploadFileSheetNE = () => {
             name={field}
             control={control}
             rules={{ required: `${field} is required` }}
-            render={({ field: { onChange, value }, fieldState: { error } }) =>{
+            render={({ field: { onChange, value }, fieldState: { error } }) => {
               return fallbackFields[field] ? (
-                <InputNE 
-                  placeholder={`Enter ${field}`} 
-                  value={value} 
-                  onChangeText={onChange} 
-                  title={field} 
-                  error={typeof error?.message === 'string' ? error.message : undefined} 
+                <InputNE
+                  placeholder={`Enter ${field}`}
+                  value={value}
+                  onChangeText={onChange}
+                  title={field}
+                  error={typeof error?.message === 'string' ? error.message : undefined}
                 />
               ) : (
-                <SelectNE 
-                  options={field == 'university' ? universityData :[]}
-                  title={field} 
-                  error={typeof error?.message === 'string' ? error.message : undefined} 
-                  onChange={onChange}
+                <SelectNE
+                  options={returnFieldWiseList(field)}
+                  title={field}
+                  error={typeof error?.message === 'string' ? error.message : undefined}
+                  onChange={(e: any) => {
+                    listApiCall(field,e);
+                    onChange(e);
+                  }}
                 />
-              )}
+              )
+            }
             }
           />
         </View>
@@ -163,7 +224,7 @@ const UploadFileSheetNE = () => {
               </View>
             </TouchableOpacity>
             {error && (
-              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2"/> {error.message}</Text>
+              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2" /> {error.message}</Text>
             )}
           </>
         )}
@@ -192,7 +253,7 @@ const UploadFileSheetNE = () => {
               </View>
             </TouchableOpacity>
             {error && (
-              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2"/> {error.message}</Text>
+              <Text className="text-red-700 text-sm mb-2"><AlertCircleIcon size={14} color={'#b91c1c'} className="me-2" /> {error.message}</Text>
             )}
           </>
         )}

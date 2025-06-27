@@ -139,14 +139,15 @@ export default function RegisterScreen() {
               />
               <InputNE
                 title='Password'
-                placeholder='Enter your password'
+                isRequired
+                type='password'
                 value={password}
+                placeholder='Enter your password'
                 onChangeText={(text: string) => {
                   setPassword(text);
                   setPasswordError('');
                 }
                 }
-                
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
                 error={passwordError}

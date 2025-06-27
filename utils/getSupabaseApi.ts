@@ -47,7 +47,7 @@ export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: s
 };
 
 
-export const getCourses = async ({ searchTerm, collegeId }: { searchTerm: string, collegeId: string }) => {
+export const getCourses = async ({ searchTerm, collegeId }: { searchTerm?: string, collegeId: string }) => {
     const query = supabase.from('courses').select('*').eq('college_id', collegeId).order('name', { ascending: true }).limit(50);
 
     handleQuery({query,searchTerm});
@@ -59,13 +59,14 @@ export const getCourses = async ({ searchTerm, collegeId }: { searchTerm: string
     return data?.map((item) => ({
         label: item.name,
         value: item.id,
+        id: item.id,
     })) || [];
 }
 
 export const getBranches = async ({ searchTerm, courseId }: { searchTerm?: string, courseId: string }) => {
     const query = supabase.from('branches').select('*').eq('course_id', courseId).order('name', { ascending: true }).limit(50);
 
-     handleQuery({query,searchTerm});
+    handleQuery({query,searchTerm});
     const { data, error } = await query;
 
     if (error) {
@@ -74,46 +75,9 @@ export const getBranches = async ({ searchTerm, courseId }: { searchTerm?: strin
     return data?.map((item) => ({
         label: item.name,
         value: item.id,
+        id: item.id,
     })) || [];
 }
-
-// export const getYears = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-//     const { data, error } = await supabase
-//         .from('years')
-//         .select('*')
-//         .eq('branch_id', basedId)
-//         .ilike('name', `%${searchTerm}%`)
-//         .order('name', { ascending: true })
-//         .limit(50);
-
-//     if (error) {
-//         Alert.alert("Years fetching error!")
-//     }
-//     return data?.map((item) => ({
-//         label: item.name,
-//         value: item.id,
-//     })) || [];
-// }
-
-// export const getSemesters = async ({ searchTerm, basedId }: { searchTerm: string, basedId: string }) => {
-//     const { data, error } = await supabase
-//         .from('semesters')
-//         .select('*')
-//         .eq('year_id', basedId)
-//         .ilike('name', `%${searchTerm}%`)
-//         .order('name', { ascending: true })
-//         .limit(50);
-
-//     if (error) {
-//         Alert.alert("Semesters fetching error!")
-//     }
-//     return data?.map((item) => ({
-//         label: item.name,
-//         value: item.id,
-//     })) || [];
-// }
-
-
 
 export const postUniversityOrCollegeOrCourseEtc = async (payload: {
   university_name: string,
