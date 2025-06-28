@@ -20,7 +20,7 @@ export default function ButtonNE({
     return (<ButtonGroup className='mb-6'>
         <Button
         size="lg"
-            className={className || "bg-[#4A90E2]"}
+            className={`bg-[#4A90E2] ${className}`}
             onPress={onPress}
             disabled={disabled || loading}
             style={({ pressed }: { pressed: boolean }) => ({

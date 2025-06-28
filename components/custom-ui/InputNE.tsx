@@ -36,7 +36,7 @@ export default function InputNE({
   placeholder,
   onChangeText,
   keyboardType = 'default',
-  size = "lg",
+  size = "md",
   prefixIcon = false,
   prefixIconName,
   postfixIcon = false,
@@ -86,6 +86,7 @@ export default function InputNE({
               type == 'password' ? <Pressable onPress={() => onShowPasswordToggle?.()}>
                 <InputIcon
                   as={showPassword ? Eye : EyeOff}
+                  width={size == 'lg' ? 22 : 18}
                 />
               </Pressable>
                 :

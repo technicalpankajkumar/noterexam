@@ -111,6 +111,7 @@ export default function RegisterScreen() {
                 }
                 error={nameError}
                 keyboardType='numbers-and-punctuation'
+                isRequired
               />
               <InputNE
                 title='Mobile'
@@ -123,6 +124,7 @@ export default function RegisterScreen() {
                 }
                 error={mobileError}
                 keyboardType='number-pad'
+                isRequired
               />
   
               <InputNE
@@ -136,6 +138,7 @@ export default function RegisterScreen() {
                 }
                 error={emailError}
                 keyboardType='email-address'
+                isRequired
               />
               <InputNE
                 title='Password'
@@ -157,11 +160,12 @@ export default function RegisterScreen() {
                 loading={loading}
                 title='Sign Up'
                 onPress={handleRegister}
+                className='mt-4'
               />
               <View className="flex-row justify-center items-center">
-                <Text className="text-[#666] text-sm">Already have an account?  </Text>
+                <Text className="text-[#666] text-base">Already have an account?  </Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                  <Text className="text-[#4A90E2] text-sm font-medium">Log in</Text>
+                  <Text className="text-[#4A90E2] text-base font-medium">Log in</Text>
                 </TouchableOpacity>
               </View>
             </View>
