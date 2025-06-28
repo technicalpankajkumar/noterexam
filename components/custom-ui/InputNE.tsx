@@ -16,7 +16,7 @@ type InputNEProps = {
   onChangeText?: (text: string) => void;
   keyboardType?: KeyboardTypeOptions;
   title?: string;
-  size?: 'lg' | 'sm' | 'md' | 'xl';
+  size?: 'lg' | 'sm' | 'md';
   prefixIcon?: boolean;
   postfixIcon?: boolean;
   isRequired?: boolean;
@@ -36,7 +36,7 @@ export default function InputNE({
   placeholder,
   onChangeText,
   keyboardType = 'default',
-  size = "md",
+  size = "lg",
   prefixIcon = false,
   prefixIconName,
   postfixIcon = false,
@@ -50,7 +50,7 @@ export default function InputNE({
     <View className="mb-2">
       <FormControl
         isInvalid={!!error}
-        size="sm"
+        size={size}
         isDisabled={false}
         isReadOnly={false}
         isRequired={false}

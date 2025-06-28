@@ -11,7 +11,7 @@ type ButtonProps = {
 
 export default function ButtonNE({
     loading,
-    title,
+    title= "Login",
     className,
     onPress,
     disabled,
@@ -19,7 +19,7 @@ export default function ButtonNE({
 
     return (<ButtonGroup className='mb-6'>
         <Button
-        size="sm"
+        size="lg"
             className={className || "bg-[#4A90E2]"}
             onPress={onPress}
             disabled={disabled || loading}
@@ -32,8 +32,10 @@ export default function ButtonNE({
             })}
             android_ripple={{ color: '#4A90E2', borderless: false }}
         >
-            <ButtonText style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>{title || "Login"}</ButtonText>
-            {loading && <ButtonSpinner animating={loading} />}
+            <ButtonText style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                {loading ? <ButtonSpinner animating={loading} /> : title}
+            </ButtonText>
+            
         </Button>
     </ButtonGroup>)
 }

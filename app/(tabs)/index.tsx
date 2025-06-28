@@ -189,7 +189,7 @@ export default function HomeScreen() {
       {
         showActionsheet && <View>
           <ActionSheetNE 
-            children={<UploadFileSheetNE />} 
+            children={<UploadFileSheetNE userId={user?.id}/>} 
             showActionsheet={showActionsheet} 
             setShowActionsheet={setShowActionsheet} 
             handleClose={handleCloseActionSheetNE}

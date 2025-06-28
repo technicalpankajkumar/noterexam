@@ -21,7 +21,7 @@ export const getUniversity = async (searchTerm: string | null) => {
     }
     return data?.map((item) => ({
         label: item.name,
-        value: item.name,
+        value: item.id,
         id:item.id
     })) || [];
 }
@@ -40,7 +40,7 @@ export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: s
   return (
     data?.map((item) => ({
       label: item.name,
-      value: item.name,
+      value: item.id,
       id: item.id,
     })) || []
   );
@@ -153,8 +153,6 @@ export const postDocDetails = async (payload: {
     college_id: string,
     course_id: string,
     branch_id: string,
-    year_id: string,
-    semester_id: string,
     thumbnail_url?: string
 }) => {
     const { data, error } = await supabase.from('doc_details').insert([
@@ -168,8 +166,6 @@ export const postDocDetails = async (payload: {
             college_id: payload.college_id,
             course_id: payload.course_id,
             branch_id: payload.branch_id,
-            year_id: payload.year_id,
-            semester_id: payload.semester_id,
         },
     ]);
 
