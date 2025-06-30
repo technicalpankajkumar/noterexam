@@ -151,28 +151,33 @@ export const postDocDetails = async (payload: {
     college_id: string,
     course_id: string,
     branch_id: string,
-    thumbnail_url?: string
+    thumbnail_url?: string,
+    type:'quantum' | 'book' | 'notes'; 
 }) => {
+     try {
     const { data, error } = await supabase.from('doc_details').insert([
-        {
-            user_id: payload.user_id, // from Supabase Auth
-            title: payload.title,
-            description: payload.description,
-            document_url: payload.document_url,
-            thumbnail_url: payload.thumbnail_url,
-            university_id: payload.university_id,
-            college_id: payload.college_id,
-            course_id: payload.course_id,
-            branch_id: payload.branch_id,
-        },
-    ]);
+      {
+        user_id: payload.user_id,
+        title: payload.title,
+        description: payload.description,
+        document_url: payload.document_url,
+        thumbnail_url: payload.thumbnail_url,
+        university_id: payload.university_id,
+        college_id: payload.college_id,
+        course_id: payload.course_id,
+        branch_id: payload.branch_id,
+        type: payload.type,
+      },
+    ]).select(); // optional: return inserted rows
 
     if (error) {
-        Alert.alert("Document posting error!");
-        return { status: "error", msg: error.message };
+      return { status: "error", msg: error.message };
     }
-    else
-        return { status: "success", msg: data };
+    return { status: "success", msg: data };
+  } catch (err: any) {
+    // Alert.alert("Unexpected error", err.message || "Something went wrong");
+    return { status: "error", msg: err.message || err };
+  }
 }
 
 

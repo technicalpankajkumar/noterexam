@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { getAllPdf } from '../../utils/FileUploadHelper';
+import { getAllPdf } from '../../utils/getSupabaseApi';
 
 interface PdfFile {
   id: string;

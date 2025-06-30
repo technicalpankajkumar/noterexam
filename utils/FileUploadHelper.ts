@@ -10,33 +10,38 @@ const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
 export const selectFileNoteByDevice = async () => {
   try {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (result.canceled || !result.assets || result.assets.length === 0) {
+    const doc = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+    if (doc.canceled || !doc.assets || doc.assets.length === 0) {
       Alert.alert('User canceled or no file selected.');
       return;
     }
 
-    const file = result.assets[0];
-    const fileUri = file.uri;
-
-    const fileName = `${file.name}`;
+    
+    if (doc.canceled || !doc.assets?.[0]) return;
+    
+    const fileUri = doc.assets[0].uri;
+    const fileName = doc.assets[0].name;
     const path = `pdfs/${fileName}`;
 
-    const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+  const response = await fetch(fileUri);
+  const fileBlob = await response.blob();
 
-    const fileBuffer = Buffer.from(base64Data, 'base64');
-    return {success:true,fileBuffer,path,fileName}
+  // Check login
+  const session = await supabase.auth.getSession();
+  if (!session.data.session) {
+    Alert.alert("You must log in first");
+    return;
+  }
+    return {success:true,fileBlob,path,fileName}
   } catch (err) {
     return { success: false, error: err };
   }
 };
 
-export const uploadFileServer= async({path,fileBuffer}:{path:string,fileBuffer:Buffer})=>{
+export const uploadFileServer= async({path,fileBlog}:{path:string,fileBlog:string})=>{
   const { data, error } = await supabase.storage
-      .from('doc') // Replace 'doc' with your actual bucket name
-      .upload(path, fileBuffer, {
+      .from('file')
+      .upload(path, fileBlog, {
         contentType: 'application/pdf',
         upsert: true,
       });
@@ -91,7 +96,7 @@ export const selectImageByDevice = async ()=> {
 export const uploadImageServer= async({filePath,base64,contentType}:{filePath:string,base64:string,contentType:string})=>{
   // Upload to Supabase
     const { data, error } = await supabase.storage
-      .from('profile-images')
+      .from('thumbnails')
       .upload(filePath, Buffer.from(base64, 'base64'), {
         contentType,
         upsert: true,

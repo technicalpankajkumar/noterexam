@@ -1,9 +1,9 @@
 
 import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { selectFileNoteByDevice, selectImageByDevice, uploadFileServer, uploadImageServer } from "../../utils/FileUploadHelper";
 import { getBranches, getColleges, getCourses, getUniversity, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
@@ -12,20 +12,33 @@ import InputNE from "./InputNE";
 import SelectNE from "./SelectNE";
 import TextAreaNE from "./TextAreaNE";
 
+ type FileNoteType =
+    | { success: true; fileBlob: Blob; path: string; fileName: string }
+    | { success: false; error: unknown }
+    | undefined;
+
+  type ThumbnailType =
+    | { filePath: string; base64: string; contentType: string; fileName: string }
+    | undefined;
+
 
 const UploadFileSheetNE = ({userId}:{userId:string}) => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
-  const { control, handleSubmit, formState: { errors }, watch } = useForm();
+  const { control, handleSubmit, formState: { errors }, watch ,reset} = useForm();
   const [universityData, setUniversityData] = useState<{ label: string, value: string, id: string }[]>([])
   const [collegeData, setCollegeData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [courseData, setCourseData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [branchData, setBranchData] = useState<{ label: string, value: string, id: string }[]>([]);
-  const [filesData,setFilesData] = useState({
-    fileNote:{},
-    thumbnail:{}
+ 
+  const [filesData, setFilesData] = useState<{
+    fileNote: FileNoteType;
+    thumbnail: ThumbnailType;
+  }>({
+    fileNote: undefined,
+    thumbnail: undefined,
   })
-  const fileBufferRef = useRef<Uint8Array | null>(null);
   const [bufferLoading,setBufferLoading] = useState(false)
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
     const res = await postUniversityOrCollegeOrCourseEtc({
@@ -38,7 +51,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
     })
 
     const res2 = await uploadFileServer({
-         fileBuffer: fileBufferRef.current,
+         fileBlog: filesData?.fileNote?.fileBlob,
          path:filesData?.fileNote?.path
     });
     const res3 = await uploadImageServer({
@@ -49,35 +62,38 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
 
     console.log(res2,res3)
 
-    const thumbnail_url = res3?.data?.fullPath
-    const document_url = res2?.data?.fullPath
+    const thumbnail_url = res3?.data?.fullPath;
+    const document_url = res2?.data?.fullPath ?? "";
 
     const payload = {
         user_id: userId,
         title: data.title,
         description: data.description,
-        university_id:res.university_id,
+        university_id: res.university_id,
         college_id: res.college_id,
         course_id: res.course_id,
         branch_id: res.branch_id,
+        type: data.type,
         document_url,
         thumbnail_url
     }
-console.log(payload,'payload')
+    console.log(payload,'payload')
+    setUploadLoading(true)
     const response = await postDocDetails(payload)
+    setUploadLoading(true)
 
-    if(response.status){
-        Alert.alert("Notes Uploaded Successfully!")
+    if(response.status === 'success'){
+        Alert.alert("Notes Uploaded Successfully!");
+        reset();
+    }else{
+        Alert.alert("Error", response.msg || "Something went wrong")
     }
   };
-  // console.log(watch('university')); //get value of selected university
-
   const fetchData = async () => {
     const data = await getUniversity(null);
     setUniversityData(data)
   };
   const fetchColleges = async (universityId: string) => {
-    console.log(universityId,"=============")
     const data = await getColleges({
       searchTerm: null,
       universityId
@@ -138,10 +154,7 @@ console.log(payload,'payload')
     }
   }
   const listApiCall = (field: string, e: any) => {
-<<<<<<< HEAD
-=======
 
->>>>>>> 916971c525d7a6fec97b557ba398ee2c24dba445
     if (field == 'university') {
       fetchColleges(e)
     }
@@ -190,7 +203,7 @@ console.log(payload,'payload')
           <SelectNE
             options={[
               { label: 'Book', value: 'book', id: '1' },
-              { label: 'Model/Quantum Paper', value: 'model_paper', id: '2' },
+              { label: 'Model/Quantum Paper', value: 'quantum', id: '2' },
               { label: 'Notes', value: 'notes', id: '3' }
             ]}
             onChange={onChange}
@@ -255,11 +268,9 @@ console.log(payload,'payload')
                 setBufferLoading(true)
                 const fileNote = await selectFileNoteByDevice();
                 onChange(fileNote?.fileName);
-                const { fileBuffer, ...fileNoteMeta } = fileNote || {};
-                fileBufferRef.current = fileNote?.fileBuffer;
                 setFilesData(pre => ({
                   ...pre,
-                  fileNote:fileNoteMeta
+                  fileNote
                 }))
                 setBufferLoading(false)
               }
@@ -289,11 +300,28 @@ console.log(payload,'payload')
             <TouchableOpacity
               onPress={async () => {
                 const thumbnail = await selectImageByDevice();
-                 setFilesData(pre => ({
-                  ...pre,
-                  thumbnail
-                }))
-                onChange(thumbnail?.fileName);
+                if (
+                  thumbnail &&
+                  'filePath' in thumbnail &&
+                  'base64' in thumbnail &&
+                  'contentType' in thumbnail
+                ) {
+                  const res3 = await uploadImageServer({
+                    filePath: thumbnail.filePath,
+                    base64: thumbnail.base64,
+                    contentType: thumbnail.contentType,
+                  });
+                  console.log(res3, 'res3 from uploadImageServer');
+                  setFilesData(pre => ({
+                    ...pre,
+                    thumbnail: (thumbnail && thumbnail.filePath && thumbnail.base64 && thumbnail.contentType && thumbnail.fileName)
+                      ? thumbnail
+                      : undefined,
+                  }));
+                  onChange(thumbnail?.fileName);
+                } else {
+                  Alert.alert("Error", "Failed to select a valid image file.");
+                }
               }
               }
               className=""
@@ -312,11 +340,9 @@ console.log(payload,'payload')
           </>
         )}
       />
-
       <ButtonNE
         onPress={handleSubmit(onSubmit)}
-        // onPress={staticFn}
-        loading={false}
+        loading={uploadLoading}
         title="Upload"
       />
     </ScrollView>
