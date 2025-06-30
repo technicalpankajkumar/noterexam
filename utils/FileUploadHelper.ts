@@ -3,7 +3,6 @@ import { Buffer } from 'buffer';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert } from 'react-native';
 global.Buffer = global.Buffer || Buffer;
 
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
@@ -14,69 +13,42 @@ type UploadFileParams = {
 };
 
 export const selectFileNoteByDevice = async () => {
-  try {
-    const doc = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (doc.canceled || !doc.assets || doc.assets.length === 0) {
-      Alert.alert('User canceled or no file selected.');
+   try {
+    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      console.log('User canceled or no file selected.');
       return;
     }
 
-    
-    if (doc.canceled || !doc.assets?.[0]) return;
-    
-    const fileUri = doc.assets[0].uri;
-    const fileName = doc.assets[0].name;
+    const file = result.assets[0];
+    const fileUri = file.uri;
+
+    const fileName = `${file.name}`;
     const path = `pdfs/${fileName}`;
 
-  const response = await fetch(fileUri);
-  const fileBlob = await response.blob();
+    const base64Data = await FileSystem.readAsStringAsync(fileUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
-  // Check login
-  const session = await supabase.auth.getSession();
-  if (!session.data.session) {
-    Alert.alert("You must log in first");
-    return;
-  }
-    return {success:true,fileBlob,path,fileName}
-  } catch (err) {
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+    return {success:true,fileBuffer,path,fileName}
+   } catch (err) {
     return { success: false, error: err };
   }
 };
 
-export const uploadFileServer = async ({
-  path,
-  fileBlog,
-}: UploadFileParams): Promise<{
-  success: boolean;
-  data?: any;
-  error?: string;
-}> => {
-  try {
-    if (!path || !fileBlog) {
-      return { success: false, error: 'Missing file path or content' };
-    }
-    console.log('Uploading file to path:', path,fileBlog);
-    const { data, error } = await supabase.storage
-    .from('file') // 👈 bucket name
-    .upload(path, fileBlog, {
-      contentType: 'application/pdf',
-      upsert: true,
-    });
-    console.log('Upload result:', data, error);
+export const uploadFileServer= async({path,fileBuffer}:{path:string,fileBuffer:Buffer})=>{
+  const { data, error } = await supabase.storage
+      .from('file') // Replace 'doc' with your actual bucket name
+      .upload(path, fileBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      });
     if (error) {
-      console.error('Upload error:', error.message);
-      return { success: false, error: error.message };
+      return { success: false, error };
     }
-
     return { success: true, data };
-  } catch (err: any) {
-    console.error('Unexpected error during upload:', err);
-    return {
-      success: false,
-      error: err?.message || 'Unexpected error during upload',
-    };
-  }
-};
+}
 
 export const selectImageByDevice = async ()=> {
   try {

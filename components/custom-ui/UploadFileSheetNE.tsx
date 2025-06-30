@@ -1,11 +1,11 @@
 
 import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { selectFileNoteByDevice, selectImageByDevice, uploadFileServer, uploadImageServer } from "../../utils/FileUploadHelper";
-import { getBranches, getColleges, getCourses, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+import { getBranches, getColleges, getCourses, getUniversity, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -37,6 +37,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
     fileNote: undefined,
     thumbnail: undefined,
   })
+    const fileBufferRef = useRef<Uint8Array | null>(null);
   const [bufferLoading,setBufferLoading] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -52,44 +53,41 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
     })
 
     const res2 = await uploadFileServer({
-         fileBlog: filesData?.fileNote?.fileBlob,
+          fileBuffer: fileBufferRef.current,
          path:filesData?.fileNote?.path
     });
-    console.log(res2, 'res2 from uploadFileServer');
+
     const res3 = await uploadImageServer({
       filePath:filesData?.thumbnail?.filePath,
       base64:filesData?.thumbnail?.base64,
       contentType:filesData?.thumbnail?.contentType
     });
-    // console.log(res3, 'res3 from uploadImageServer');
-console.log("i am here")
-setUploadLoading(false)
-    // const thumbnail_url = res3?.data?.fullPath;
-    // const document_url = res2?.data?.fullPath ?? "";
+    const thumbnail_url = res3?.data?.fullPath;
+    const document_url = res2?.data?.fullPath ?? "";
 
-    // const payload = {
-    //     user_id: userId,
-    //     title: data.title,
-    //     description: data.description,
-    //     university_id: res.university_id,
-    //     college_id: res.college_id,
-    //     course_id: res.course_id,
-    //     branch_id: res.branch_id,
-    //     type: data.type,
-    //     document_url,
-    //     thumbnail_url
-    // }
-    // console.log(payload,'payload')
+    const payload = {
+        user_id: userId,
+        title: data.title,
+        description: data.description,
+        university_id: res.university_id,
+        college_id: res.college_id,
+        course_id: res.course_id,
+        branch_id: res.branch_id,
+        type: data.type,
+        document_url,
+        thumbnail_url
+    }
+    console.log(payload,'payload')
     
-    // const response = await postDocDetails(payload)
-    // setUploadLoading(false)
+    const response = await postDocDetails(payload)
+    setUploadLoading(false)
 
-    // if(response.status === 'success'){
-    //     Alert.alert("Notes Uploaded Successfully!");
-    //     reset();
-    // }else{
-    //     Alert.alert("Error", response.msg || "Something went wrong")
-    // }
+    if(response.status === 'success'){
+        Alert.alert("Notes Uploaded Successfully!");
+        reset();
+    }else{
+        Alert.alert("Error", response.msg || "Something went wrong")
+    }
   };
   const fetchData = async () => {
     const data = await getUniversity(null);
@@ -267,14 +265,16 @@ setUploadLoading(false)
           <>
             <TouchableOpacity
               onPress={async () => {
-                setBufferLoading(true)
+                setBufferLoading(true);
                 const fileNote = await selectFileNoteByDevice();
-                const res = await uploadFileServer({fileBlog: fileNote?.fileBlob, path: fileNote?.path});
                 onChange(fileNote?.fileName);
+                const { fileBuffer, ...fileNoteMeta } = fileNote || {};
+                fileBufferRef.current = fileNote?.fileBuffer;
                 setFilesData(pre => ({
                   ...pre,
-                  fileNote
+                  fileNote:fileNoteMeta
                 }))
+                onChange(fileNote?.path);
                 setBufferLoading(false)
               }
               }
