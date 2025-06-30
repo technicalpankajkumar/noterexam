@@ -191,7 +191,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
         control={control}
         rules={{ required: 'Description is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextAreaNE  onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
+          <TextAreaNE  onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined}  value={value} />
         )}
       />
 
@@ -209,6 +209,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
             onChange={onChange}
             isRequired
             error={typeof error?.message === 'string' ? error.message : undefined}
+            value={value}
           />
         )}
       />
@@ -249,6 +250,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
                     listApiCall(field,e);
                     onChange(e);
                   }}
+                  value={value}
                 />
               )
             }

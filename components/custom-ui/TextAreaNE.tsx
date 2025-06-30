@@ -3,17 +3,19 @@ import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { AlertCircleIcon } from "lucide-react-native";
 import { Text } from "react-native";
 
-interface TextAreaNEProps{
-    isRequired?:boolean
-    error?:string;
-    errorMsg?:string
-    onChange?:()=>void
+interface TextAreaNEProps {
+    isRequired?: boolean
+    error?: string;
+    errorMsg?: string
+    onChange?: () => void,
+    value?: string
 }
-const TextAreaNE:React.FC<TextAreaNEProps> = ({
+const TextAreaNE: React.FC<TextAreaNEProps> = ({
     isRequired,
     errorMsg,
     error,
-    onChange
+    onChange,
+    value
 }) => {
     return (
         <FormControl size="md" className="mb-2" isInvalid={!!error}>
@@ -25,17 +27,18 @@ const TextAreaNE:React.FC<TextAreaNEProps> = ({
             <Textarea className="min-w-[200px]">
                 <TextareaInput
                     size="sm"
-                    style={{ textAlignVertical: 'top', fontSize: 14, }} // ✅ ensures cursor starts at top
+                    style={{ textAlignVertical: 'top', fontSize: 14, }}
                     multiline
                     placeholder="Type your book related description."
                     onChangeText={onChange}
+                    value={value}
                 />
             </Textarea>
             {errorMsg && <FormControlHelper>
-                      <FormControlHelperText>
-                        {errorMsg}
-                      </FormControlHelperText>
-                    </FormControlHelper>}
+                <FormControlHelperText>
+                    {errorMsg}
+                </FormControlHelperText>
+            </FormControlHelper>}
             <FormControlError>
                 <FormControlErrorIcon as={AlertCircleIcon} />
                 <FormControlErrorText>

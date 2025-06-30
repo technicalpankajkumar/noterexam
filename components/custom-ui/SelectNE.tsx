@@ -11,6 +11,7 @@ interface SelectNEProps {
     onChange?: (e: any) => void;
     options?: { id: string, label: string, value: string }[];
     placeholder?:string;
+    value?: string;
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,
@@ -19,7 +20,8 @@ const SelectNE: React.FC<SelectNEProps> = ({
     isRequired,
     onChange,
     options =[],
-    placeholder="Select option"
+    placeholder="Select option",
+    value
 }) => {
     return (
         <FormControl
@@ -35,9 +37,9 @@ const SelectNE: React.FC<SelectNEProps> = ({
                     {title} {isRequired && <Text className="text-red-700">*</Text>}
                 </FormControlLabelText>
             </FormControlLabel>
-            <Select onValueChange={onChange}>
+            <Select onValueChange={onChange} >
                 <SelectTrigger>
-                    <SelectInput size="md" placeholder="Select option" className="flex-1 h-10" />
+                    <SelectInput size="md" placeholder={placeholder} className="flex-1 h-10" value={value}/>
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>
                 <SelectPortal>
