@@ -3,6 +3,7 @@ import { Buffer } from 'buffer';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import { Alert } from 'react-native';
 global.Buffer = global.Buffer || Buffer;
 
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
@@ -11,7 +12,7 @@ export const selectFileNoteByDevice = async () => {
   try {
     const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
     if (result.canceled || !result.assets || result.assets.length === 0) {
-      console.log('User canceled or no file selected.');
+      Alert.alert('User canceled or no file selected.');
       return;
     }
 
@@ -44,8 +45,6 @@ export const uploadFileServer= async({path,fileBuffer}:{path:string,fileBuffer:B
     }
     return { success: true, data };
 }
-
-
 
 export const selectImageByDevice = async ()=> {
   try {
@@ -104,19 +103,4 @@ export const uploadImageServer= async({filePath,base64,contentType}:{filePath:st
     return { success: true, data };
 }
 
-export const getAllPdf = async () => {
-  const { data, error } = await supabase
-    .storage
-    .from('doc')         // Bucket name
-    .list('pdfs', {      // Path (folder) inside the bucket
-      limit: 100,        // Max files to return
-      sortBy: { column: 'name', order: 'asc' }, // optional
-    });
-  if (error) {
-    console.error('Failed to fetch files', error.message);
-    return [];
-  }
-  let filter = data.map(res => ({name:res.name,id:res.id,created_at:res.created_at}))
-  return filter;
-};
 

@@ -21,7 +21,7 @@ export const getUniversity = async (searchTerm: string | null) => {
     }
     return data?.map((item) => ({
         label: item.name,
-        value: item.name,
+        value: item.id,
         id:item.id
     })) || [];
 }
@@ -40,12 +40,11 @@ export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: s
   return (
     data?.map((item) => ({
       label: item.name,
-      value: item.name,
+      value: item.id,
       id: item.id,
     })) || []
   );
 };
-
 
 export const getCourses = async ({ searchTerm, collegeId }: { searchTerm?: string, collegeId: string }) => {
     const query = supabase.from('courses').select('*').eq('college_id', collegeId).order('name', { ascending: true }).limit(50);
@@ -143,7 +142,6 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
   }
 };
 
-
 export const postDocDetails = async (payload: {
     user_id: string,
     title: string,
@@ -153,8 +151,6 @@ export const postDocDetails = async (payload: {
     college_id: string,
     course_id: string,
     branch_id: string,
-    year_id: string,
-    semester_id: string,
     thumbnail_url?: string
 }) => {
     const { data, error } = await supabase.from('doc_details').insert([
@@ -168,8 +164,6 @@ export const postDocDetails = async (payload: {
             college_id: payload.college_id,
             course_id: payload.course_id,
             branch_id: payload.branch_id,
-            year_id: payload.year_id,
-            semester_id: payload.semester_id,
         },
     ]);
 
@@ -182,8 +176,23 @@ export const postDocDetails = async (payload: {
 }
 
 
+export const getAllPdf = async () => {
+  const { data, error } = await supabase
+    .storage
+    .from('doc')         // Bucket name
+    .list('pdfs', {      // Path (folder) inside the bucket
+      limit: 100,        // Max files to return
+      sortBy: { column: 'name', order: 'asc' }, // optional
+    });
+  if (error) {
+    console.error('Failed to fetch files', error.message);
+    return [];
+  }
+  let filter = data.map(res => ({name:res.name,id:res.id,created_at:res.created_at}))
+  return filter;
+};
 
-export const getAllNotes = async ({ userId }: { userId: string }) => {
+export const getAllNoteByUserId = async ({ userId }: { userId: string }) => {
     const { data, error } = await supabase
         .from('doc_details')
         .select('*, universities(name), colleges(name), courses(name), branches(name), years(year_number), semesters(semester_number)')

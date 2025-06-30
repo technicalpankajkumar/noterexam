@@ -3,6 +3,7 @@ import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
 import { getBranches, getColleges, getCourses, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
@@ -39,6 +40,7 @@ const UploadFileSheetNE = () => {
     setUniversityData(data)
   };
   const fetchColleges = async (universityId: string) => {
+    console.log(universityId,"=============")
     const data = await getColleges({
       searchTerm: null,
       universityId
@@ -64,7 +66,7 @@ const UploadFileSheetNE = () => {
     fetchData();
   }, []);
 
-  const fields = ['university', 'college', 'course', 'branch', 'year', 'semester',];
+  const fields = ['university', 'college', 'course', 'branch', 'year', 'semester'];
   const yearData = [
     { label: '1st Year', value: '1', id: '1' },
     { label: '2nd Year', value: '2', id: '2' },
@@ -99,15 +101,14 @@ const UploadFileSheetNE = () => {
     }
   }
   const listApiCall = (field: string, e: any) => {
-    console.log(e,'=========')
     if (field == 'university') {
-      fetchColleges(e.value)
+      fetchColleges(e)
     }
     else if (field == 'college') {
-      fetchCourse(e.value)
+      fetchCourse(e)
     }
     else if (field == 'course') {
-      fetchBranches(e.value)
+      fetchBranches(e)
     }
   }
 
@@ -163,14 +164,14 @@ const UploadFileSheetNE = () => {
       {fields.map((field) => (
         <View key={field} className="space-y-1">
           <View className="flex-row items-center justify-between">
-            <CheckBoxNE
+           {!(['year', 'semester'].includes(field)) && <CheckBoxNE
               isChecked={fallbackFields[field]}
               onChange={() =>
                 setFallbackFields((prev) => ({ ...prev, [field]: !prev[field] }))
               }
               aria-label={`Use custom ${field}`}
               title={'Not exist'}
-            />
+            />}
           </View>
           <Controller
             name={field}
@@ -182,13 +183,14 @@ const UploadFileSheetNE = () => {
                   placeholder={`Enter ${field}`}
                   value={value}
                   onChangeText={onChange}
-                  title={field}
+                  title={capitalizeFirstLetter(field)}
                   error={typeof error?.message === 'string' ? error.message : undefined}
                 />
               ) : (
                 <SelectNE
+                  placeholder={`Select ${field}`}
                   options={returnFieldWiseList(field)}
-                  title={field}
+                  title={capitalizeFirstLetter(field)}
                   error={typeof error?.message === 'string' ? error.message : undefined}
                   onChange={(e: any) => {
                     listApiCall(field,e);
