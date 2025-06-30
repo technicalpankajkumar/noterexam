@@ -2,16 +2,10 @@
 import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-<<<<<<< HEAD
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
-import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
-import { getBranches, getColleges, getCourses, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
-=======
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { selectFileNoteByDevice, selectImageByDevice, uploadFileServer, uploadImageServer } from "../../utils/FileUploadHelper";
 import { getBranches, getColleges, getCourses, getUniversity, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
->>>>>>> 916971c525d7a6fec97b557ba398ee2c24dba445
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
