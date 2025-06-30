@@ -42,7 +42,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
   const [uploadLoading, setUploadLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
-    setUploadLoading(false)
+    setUploadLoading(true);
     const res = await postUniversityOrCollegeOrCourseEtc({
       university_name: data.university,
       college_name: data.college,
@@ -77,7 +77,6 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
         document_url,
         thumbnail_url
     }
-    console.log(payload,'payload')
     
     const response = await postDocDetails(payload)
     setUploadLoading(false)
@@ -209,7 +208,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
             onChange={onChange}
             isRequired
             error={typeof error?.message === 'string' ? error.message : undefined}
-            value={value}
+            // value={value}
           />
         )}
       />
@@ -250,7 +249,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
                     listApiCall(field,e);
                     onChange(e);
                   }}
-                  value={value}
+                  // value={value}
                 />
               )
             }

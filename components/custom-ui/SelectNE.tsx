@@ -39,7 +39,9 @@ const SelectNE: React.FC<SelectNEProps> = ({
             </FormControlLabel>
             <Select onValueChange={onChange} >
                 <SelectTrigger>
-                    <SelectInput size="md" placeholder={placeholder} className="flex-1 h-10" value={value}/>
+                    <SelectInput size="md" placeholder={placeholder} className="flex-1 h-10" 
+                    // value={value}
+                    />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>
                 <SelectPortal>
