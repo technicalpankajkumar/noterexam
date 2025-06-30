@@ -3,9 +3,10 @@ import UploadFileSheetNE from '@components/custom-ui/UploadFileSheetNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Bell, FileText, Plus, Search } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -15,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { selectFileNoteByDevice, uploadFileServer } from '../../utils/FileUploadHelper';
+import { getBooksDetails } from '../../utils/getSupabaseApi';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -77,6 +79,21 @@ export default function HomeScreen() {
     else alert("PDF uploaded!");
   }
 
+
+  const fetch=async()=>{
+      const res = await getBooksDetails({page: 1,limit: 20});
+
+      if (res.success) {
+        console.log('Documents:', res.data);
+        console.log('Total Pages:', res.totalPages);
+      } else {
+        Alert.alert('Fetch failed', res.error);
+      }
+  }
+
+  useEffect(()=>{
+    fetch();
+  },[])
 
   return (
     <>

@@ -197,6 +197,8 @@ export const getAllPdf = async () => {
   return filter;
 };
 
+
+
 export const getAllNoteByUserId = async ({ userId }: { userId: string }) => {
     const { data, error } = await supabase
         .from('doc_details')
@@ -228,3 +230,103 @@ export const getFilteredNotes = async ({ university_id, college_id, semester_id 
     else
         return { status: "success", data, msg: "success" };
 }
+
+
+// get books details
+
+type FetchDocumentsParams = {
+  page?: number;
+  limit?: number;
+  searchTerm?: string;
+  filters?: {
+    university_id?: string;
+    college_id?: string;
+    course_id?: string;
+    branch_id?: string;
+    year_number?: number;
+    semester_number?: number;
+    type?: 'book' | 'notes' | 'quantum'; // from your enum
+  };
+};
+
+export const getBooksDetails = async ({
+  page = 1,
+  limit = 10,
+  searchTerm = '',
+  filters = {},
+}: FetchDocumentsParams) => {
+  try {
+    const offset = (page - 1) * limit;
+
+    let query = supabase
+      .from('doc_details')
+      .select( `
+        id,
+        title,
+        description,
+        type,
+        document_url,
+        thumbnail_url,
+        university_id,
+        college_id,
+        course_id,
+        branch_id,
+        created_at
+      `,
+        { count: 'exact' }
+      )
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    // Apply search
+    if (searchTerm) {
+      query = query.ilike('title', `%${searchTerm}%`);
+    }
+
+    // Apply filters
+    const {
+      university_id,
+      college_id,
+      course_id,
+      branch_id,
+      year_number,
+      semester_number,
+      type,
+    } = filters;
+
+    if (university_id) query = query.eq('university_id', university_id);
+    if (college_id) query = query.eq('college_id', college_id);
+    if (course_id) query = query.eq('course_id', course_id);
+    if (branch_id) query = query.eq('branch_id', branch_id);
+    if (type) query = query.eq('type', type);
+
+    // Join to year/semester tables if needed in future using RPC
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Fetch error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return {
+      success: true,
+      data,
+      count,
+      page,
+      totalPages: Math.ceil((count || 0) / limit),
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || 'Unexpected fetch error',
+    };
+  }
+};
+
+const getThumbnailUrl = (path:string) => {
+  return supabase
+    .storage
+    .from('thumbnails')
+    .getPublicUrl(path.replace(/^thumbnails\//, '')).data.publicUrl;
+};
