@@ -8,6 +8,11 @@ global.Buffer = global.Buffer || Buffer;
 
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
+type UploadFileParams = {
+  path: string;
+  fileBlog: string; // 👈 base64 or string URI?
+};
+
 export const selectFileNoteByDevice = async () => {
   try {
     const doc = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
@@ -38,18 +43,40 @@ export const selectFileNoteByDevice = async () => {
   }
 };
 
-export const uploadFileServer= async({path,fileBlog}:{path:string,fileBlog:string})=>{
-  const { data, error } = await supabase.storage
-      .from('file')
-      .upload(path, fileBlog, {
-        contentType: 'application/pdf',
-        upsert: true,
-      });
-    if (error) {
-      return { success: false, error };
+export const uploadFileServer = async ({
+  path,
+  fileBlog,
+}: UploadFileParams): Promise<{
+  success: boolean;
+  data?: any;
+  error?: string;
+}> => {
+  try {
+    if (!path || !fileBlog) {
+      return { success: false, error: 'Missing file path or content' };
     }
+    console.log('Uploading file to path:', path,fileBlog);
+    const { data, error } = await supabase.storage
+    .from('file') // 👈 bucket name
+    .upload(path, fileBlog, {
+      contentType: 'application/pdf',
+      upsert: true,
+    });
+    console.log('Upload result:', data, error);
+    if (error) {
+      console.error('Upload error:', error.message);
+      return { success: false, error: error.message };
+    }
+
     return { success: true, data };
-}
+  } catch (err: any) {
+    console.error('Unexpected error during upload:', err);
+    return {
+      success: false,
+      error: err?.message || 'Unexpected error during upload',
+    };
+  }
+};
 
 export const selectImageByDevice = async ()=> {
   try {
