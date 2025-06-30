@@ -16,7 +16,7 @@ const TextAreaNE:React.FC<TextAreaNEProps> = ({
     onChange
 }) => {
     return (
-        <FormControl size="sm" className="mb-2" isInvalid={!!error}>
+        <FormControl size="md" className="mb-2" isInvalid={!!error}>
             <FormControlLabel>
                 <FormControlLabelText>
                     Description {isRequired && <Text className="text-red-700">*</Text>}
@@ -25,7 +25,7 @@ const TextAreaNE:React.FC<TextAreaNEProps> = ({
             <Textarea className="min-w-[200px]">
                 <TextareaInput
                     size="sm"
-                    style={{ textAlignVertical: 'top', fontSize: 12, }} // ✅ ensures cursor starts at top
+                    style={{ textAlignVertical: 'top', fontSize: 14, }} // ✅ ensures cursor starts at top
                     multiline
                     placeholder="Type your book related description."
                     onChangeText={onChange}

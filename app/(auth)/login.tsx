@@ -103,7 +103,7 @@ export default function LoginScreen() {
 
               <View className="flex-row justify-end items-center mb-3">
                 <TouchableOpacity>
-                  <Text className="text-sm text-[#4A90E2] font-medium">Forgot password</Text>
+                  <Text className="text-base text-[#4A90E2] font-medium">Forgot password</Text>
                 </TouchableOpacity>
               </View>
               <ButtonNE 
@@ -112,9 +112,9 @@ export default function LoginScreen() {
               />
 
               <View className="flex-row justify-center items-center">
-                <Text className="text-[#666] text-sm">Don't have an account? </Text>
+                <Text className="text-[#666] text-base">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                  <Text className="text-[#4A90E2] text-sm font-medium">Sign up</Text>
+                  <Text className="text-[#4A90E2] text-base font-medium">Sign up</Text>
                 </TouchableOpacity>
               </View>
             </View>

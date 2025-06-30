@@ -1,11 +1,17 @@
 
 import { AlertCircleIcon, UploadCloud } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+<<<<<<< HEAD
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { selectFileNoteByDevice, selectImageByDevice } from "../../utils/FileUploadHelper";
 import { getBranches, getColleges, getCourses, getUniversity, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+=======
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { selectFileNoteByDevice, selectImageByDevice, uploadFileServer, uploadImageServer } from "../../utils/FileUploadHelper";
+import { getBranches, getColleges, getCourses, getUniversity, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+>>>>>>> 916971c525d7a6fec97b557ba398ee2c24dba445
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -13,16 +19,21 @@ import SelectNE from "./SelectNE";
 import TextAreaNE from "./TextAreaNE";
 
 
-const UploadFileSheetNE = () => {
+const UploadFileSheetNE = ({userId}:{userId:string}) => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
   const { control, handleSubmit, formState: { errors }, watch } = useForm();
   const [universityData, setUniversityData] = useState<{ label: string, value: string, id: string }[]>([])
   const [collegeData, setCollegeData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [courseData, setCourseData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [branchData, setBranchData] = useState<{ label: string, value: string, id: string }[]>([]);
+  const [filesData,setFilesData] = useState({
+    fileNote:{},
+    thumbnail:{}
+  })
+  const fileBufferRef = useRef<Uint8Array | null>(null);
+  const [bufferLoading,setBufferLoading] = useState(false)
 
   const onSubmit = async (data: any) => {
-    console.log('Form Data:', data);
     const res = await postUniversityOrCollegeOrCourseEtc({
       university_name: data.university,
       college_name: data.college,
@@ -31,7 +42,39 @@ const UploadFileSheetNE = () => {
       year: data.year,
       semester: data.semester,
     })
-    console.log(res, "===================");
+
+    const res2 = await uploadFileServer({
+         fileBuffer: fileBufferRef.current,
+         path:filesData?.fileNote?.path
+    });
+    const res3 = await uploadImageServer({
+      filePath:filesData?.thumbnail?.filePath,
+      base64:filesData?.thumbnail?.base64,
+      contentType:filesData?.thumbnail?.contentType
+    });
+
+    console.log(res2,res3)
+
+    const thumbnail_url = res3?.data?.fullPath
+    const document_url = res2?.data?.fullPath
+
+    const payload = {
+        user_id: userId,
+        title: data.title,
+        description: data.description,
+        university_id:res.university_id,
+        college_id: res.college_id,
+        course_id: res.course_id,
+        branch_id: res.branch_id,
+        document_url,
+        thumbnail_url
+    }
+console.log(payload,'payload')
+    const response = await postDocDetails(payload)
+
+    if(response.status){
+        Alert.alert("Notes Uploaded Successfully!")
+    }
   };
   // console.log(watch('university')); //get value of selected university
 
@@ -101,6 +144,10 @@ const UploadFileSheetNE = () => {
     }
   }
   const listApiCall = (field: string, e: any) => {
+<<<<<<< HEAD
+=======
+
+>>>>>>> 916971c525d7a6fec97b557ba398ee2c24dba445
     if (field == 'university') {
       fetchColleges(e)
     }
@@ -125,7 +172,6 @@ const UploadFileSheetNE = () => {
             type="text"
             value={value}
             onChangeText={onChange}
-            size="sm"
             title="Title"
             isRequired={true}
             error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
@@ -138,7 +184,7 @@ const UploadFileSheetNE = () => {
         control={control}
         rules={{ required: 'Description is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextAreaNE onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
+          <TextAreaNE  onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} />
         )}
       />
 
@@ -212,17 +258,25 @@ const UploadFileSheetNE = () => {
           <>
             <TouchableOpacity
               onPress={async () => {
-                const file = await selectFileNoteByDevice();
-                onChange(file?.path);
+                setBufferLoading(true)
+                const fileNote = await selectFileNoteByDevice();
+                onChange(fileNote?.fileName);
+                const { fileBuffer, ...fileNoteMeta } = fileNote || {};
+                fileBufferRef.current = fileNote?.fileBuffer;
+                setFilesData(pre => ({
+                  ...pre,
+                  fileNote:fileNoteMeta
+                }))
+                setBufferLoading(false)
               }
               }
             >
               <Text className="text-sm font-medium ">Choose Notes</Text>
               <View className="my-2 items-center justify-center rounded-xl bg-background-50 border border-dashed border-outline-300 h-[60px] w-full">
                 <UploadCloud className="h-[50px] w-[50px] stroke-background-200" />
-                <Text className="text-sm">
+                {bufferLoading ? <ActivityIndicator size="small" color="#4A90E2" />   :<Text className="text-sm">
                   {value ? value : 'Choose notes from device'}
-                </Text>
+                </Text>}
               </View>
             </TouchableOpacity>
             {error && (
@@ -240,8 +294,12 @@ const UploadFileSheetNE = () => {
           <>
             <TouchableOpacity
               onPress={async () => {
-                const file = await selectImageByDevice();
-                onChange(file?.fileName);
+                const thumbnail = await selectImageByDevice();
+                 setFilesData(pre => ({
+                  ...pre,
+                  thumbnail
+                }))
+                onChange(thumbnail?.fileName);
               }
               }
               className=""

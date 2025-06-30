@@ -16,7 +16,7 @@ type InputNEProps = {
   onChangeText?: (text: string) => void;
   keyboardType?: KeyboardTypeOptions;
   title?: string;
-  size?: 'lg' | 'sm' | 'md' | 'xl';
+  size?: 'lg' | 'sm' | 'md';
   prefixIcon?: boolean;
   postfixIcon?: boolean;
   isRequired?: boolean;
@@ -50,7 +50,7 @@ export default function InputNE({
     <View className="mb-2">
       <FormControl
         isInvalid={!!error}
-        size="sm"
+        size={size}
         isDisabled={false}
         isReadOnly={false}
         isRequired={false}
@@ -86,6 +86,7 @@ export default function InputNE({
               type == 'password' ? <Pressable onPress={() => onShowPasswordToggle?.()}>
                 <InputIcon
                   as={showPassword ? Eye : EyeOff}
+                  width={size == 'lg' ? 22 : 18}
                 />
               </Pressable>
                 :

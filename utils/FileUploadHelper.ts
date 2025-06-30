@@ -27,7 +27,7 @@ export const selectFileNoteByDevice = async () => {
     });
 
     const fileBuffer = Buffer.from(base64Data, 'base64');
-    return {success:true,fileBuffer,path}
+    return {success:true,fileBuffer,path,fileName}
   } catch (err) {
     return { success: false, error: err };
   }

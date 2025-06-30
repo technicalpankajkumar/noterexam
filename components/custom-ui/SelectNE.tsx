@@ -24,7 +24,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
     return (
         <FormControl
             isInvalid={!!error}
-            size="sm"
+            size="md"
             isDisabled={false}
             isReadOnly={false}
             isRequired={false}
@@ -37,7 +37,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
             </FormControlLabel>
             <Select onValueChange={onChange}>
                 <SelectTrigger>
-                    <SelectInput placeholder={placeholder} className="flex-1 text-sm" />
+                    <SelectInput size="md" placeholder="Select option" className="flex-1 h-10" />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>
                 <SelectPortal>
