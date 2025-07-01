@@ -49,8 +49,8 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
         college_name: data.college,
         course_name: data.course,
         branch_name: data.branch,
-        year: data.year,
-        semester: data.semester,
+        year_id: data.year,
+        semester_id: data.semester,
       })
 
       const res2 = await uploadFileServer({

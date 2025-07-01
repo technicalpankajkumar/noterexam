@@ -83,11 +83,11 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
   college_name: string,
   course_name: string,
   branch_name: string,
-  year: string,
-  semester: string,
+  year_id: string,
+  semester_id: string,
 }) => {
   try {
-    const { university_name, college_name, course_name, branch_name, year, semester } = payload;
+    const { university_name, college_name, course_name, branch_name, year_id, semester_id } = payload;
 
     // 1. University
     const { data: universityData, error: universityError } = await supabase
@@ -120,21 +120,30 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
     const course_id = courseData;
 
     // 4. Branch
-    const { data: branchData, error: branchError } = await supabase
+    const { data: branch_id, error: branchError } = await supabase
       .rpc('find_or_create_branch', {
         p_name: branch_name,
-        p_year: year,
-        p_semester: semester,
         p_course_id: course_id,
       });
 
-    if (branchError || !branchData) throw new Error(branchError?.message || 'Failed to get/create branch');
+    if (branchError || !branch_id) throw new Error(branchError?.message || 'Failed to get/create branch');
 
+    const { data, error } = await supabase
+        .from('branch_year_semesters')
+        .insert([
+          {
+            branch_id: branch_id,
+            year_id,
+            semester_id
+          }
+        ]);
+    if (error || !data) throw new Error(error?.message || 'Failed to add year/semester to branch');
+    
     return {
       university_id,
       college_id,
       course_id,
-      branch_id: branchData,
+      branch_id,
     };
   } catch (err: any) {
     console.error('Error in post university or college or course etc:', err.message);
