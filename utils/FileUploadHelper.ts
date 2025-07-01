@@ -7,13 +7,16 @@ global.Buffer = global.Buffer || Buffer;
 
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
-type UploadFileParams = {
-  path: string;
-  fileBlog: string; // 👈 base64 or string URI?
+type UploadFileResponse = {
+  success: boolean;
+  data?: any;
+  error?: string;
+  exists?: boolean;
+  fileUrl?: string;
 };
 
 export const selectFileNoteByDevice = async () => {
-   try {
+  try {
     const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
     if (result.canceled || !result.assets || result.assets.length === 0) {
       console.log('User canceled or no file selected.');
@@ -31,26 +34,57 @@ export const selectFileNoteByDevice = async () => {
     });
 
     const fileBuffer = Buffer.from(base64Data, 'base64');
-    return {success:true,fileBuffer,path,fileName}
-   } catch (err) {
+    return { success: true, fileBuffer, path, fileName }
+  } catch (err) {
     return { success: false, error: err };
   }
 };
 
-export const uploadFileServer= async({path,fileBuffer}:{path:string,fileBuffer:Buffer})=>{
-  const { data, error } = await supabase.storage
-      .from('file') // Replace 'doc' with your actual bucket name
+export const uploadFileServer = async ({
+  path,
+  fileBuffer,
+  isPublic = true,
+}: {
+  path: string;
+  fileBuffer: Buffer;
+  isPublic?: boolean;
+}): Promise<UploadFileResponse> => {
+  try {
+    const exists = await checkFileExists(path, 'file');
+
+    if (exists) {
+      const fileUrl = await getOnlineUrl(path, isPublic, 'file');
+      return {
+        success: true,
+        exists: true,
+        fileUrl: fileUrl ?? undefined,
+      };
+    }
+
+    const { data, error } = await supabase.storage
+      .from('file')
       .upload(path, fileBuffer, {
         contentType: 'application/pdf',
-        upsert: true,
+        upsert: false, // don't overwrite
       });
-    if (error) {
-      return { success: false, error };
-    }
-    return { success: true, data };
-}
 
-export const selectImageByDevice = async ()=> {
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return {
+      success: true,
+      data
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || 'Unexpected error during upload.',
+    };
+  }
+};
+
+export const selectImageByDevice = async () => {
   try {
     // Ask for media library permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -85,26 +119,68 @@ export const selectImageByDevice = async ()=> {
     const filePath = `images/${fileName}`;
     const contentType = `image/${fileExt === 'jpg' ? 'jpeg' : fileExt}`;
 
-    return {fileName,filePath,contentType,base64};
+    return { fileName, filePath, contentType, base64 };
 
   } catch (err: any) {
     return { error: err.message || 'Upload failed' };
   }
 };
 
-export const uploadImageServer= async({filePath,base64,contentType}:{filePath:string,base64:string,contentType:string})=>{
+export const uploadImageServer = async ({ filePath, base64, contentType }: { filePath: string, base64: string, contentType: string }) => {
   // Upload to Supabase
+  try {
+    const exists = await checkFileExists(filePath, 'thumbnails');
+    if (exists) {
+      const fileUrl = await getOnlineUrl(filePath, true, 'thumbnails');
+      return {
+        success: true,
+        exists: true,
+        fileUrl: fileUrl ?? undefined,
+      };
+    }
+
     const { data, error } = await supabase.storage
       .from('thumbnails')
       .upload(filePath, Buffer.from(base64, 'base64'), {
         contentType,
-        upsert: true,
+        upsert: false,
       });
 
     if (error) {
-      return { success: false, error };
+      return { success: false, error: error.message };
     }
-    return { success: true, data };
+    const fileUrl = await getOnlineUrl(filePath, true, 'thumbnails');
+
+    return {
+      success: true,
+      data,
+      fileUrl: fileUrl ?? undefined,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || 'Unexpected error during upload.',
+    };
+  }
 }
 
+const checkFileExists = async (path: string, directory: string): Promise<boolean> => {
+  const folder = path.split('/').slice(0, -1).join('/');
+  const filename = path.split('/').pop();
+  const { data } = await supabase.storage.from(directory).list(folder);
+  return data?.some((file) => file.name === filename) ?? false;
+};
 
+
+export const getOnlineUrl = (path: string, isPublic = true, directory: string): Promise<string | null> => {
+  if (isPublic) {
+    return Promise.resolve(
+      supabase.storage.from(directory).getPublicUrl(path).data.publicUrl
+    );
+  } else {
+    return supabase.storage
+      .from(directory)
+      .createSignedUrl(path, 60 * 60)
+      .then(({ data, error }) => (error ? null : data.signedUrl));
+  }
+};

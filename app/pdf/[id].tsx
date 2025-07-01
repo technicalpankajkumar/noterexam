@@ -1,38 +1,31 @@
 import PDFViewer from '@components/custom-ui/PdfViewer';
-import { supabase } from '@lib/supabase';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { getOnlineUrl } from '../../utils/FileUploadHelper';
 
-const PdfById=()=> {
-  const { id } = useLocalSearchParams();
-  const [url,setUrl] = useState<string>('')
+const PdfById = () => {
+  const params = useLocalSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [url, setUrl] = useState<string | null>(null);
 
-const getPdfUrlByName = async (name: string) => {
-  const { data, error } = await supabase
-    .storage
-    .from('file')
-    .createSignedUrl(`pdfs/${id}`, 3600); // 1 hour URL
+  const getPdfUrlByName = async () => {
+     return await getOnlineUrl(`pdfs/${params.id}`, false, 'file');
+  };
 
-  if (error) {
-    console.error('Failed to get signed URL:', error.message);
-    return null;
-  }
-
-  return data?.signedUrl;
-};
-
-const fetchPdfUrl = async () => {
-  let url = await getPdfUrlByName(id);
-  setUrl(url);
-};
-useEffect(() => {
-  fetchPdfUrl();
-}, []);
+  const fetchPdfUrl = async () => {
+    setLoading(true);
+    let url = await getPdfUrlByName();
+    setLoading(false);
+    setUrl(url);
+  };
+  useEffect(() => {
+    fetchPdfUrl();
+  }, []);
 
   return (
     <View className="flex-1 bg-white">
-      <PDFViewer uri={url} />
+      <PDFViewer uri={url} loading={loading} />
     </View>
   );
 }

@@ -12,24 +12,24 @@ import InputNE from "./InputNE";
 import SelectNE from "./SelectNE";
 import TextAreaNE from "./TextAreaNE";
 
- type FileNoteType =
-    | { success: true; fileBlob: Blob; path: string; fileName: string }
-    | { success: false; error: unknown }
-    | undefined;
+type FileNoteType =
+  | { success: true; fileBlob: Blob; path: string; fileName: string }
+  | { success: false; error: unknown }
+  | undefined;
 
-  type ThumbnailType =
-    | { filePath: string; base64: string; contentType: string; fileName: string }
-    | undefined;
+type ThumbnailType =
+  | { filePath: string; base64: string; contentType: string; fileName: string }
+  | undefined;
 
 
-const UploadFileSheetNE = ({userId}:{userId:string}) => {
+const UploadFileSheetNE = ({ userId }: { userId: string }) => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
-  const { control, handleSubmit, formState: { errors }, watch ,reset} = useForm();
+  const { control, handleSubmit, formState: { errors }, watch, reset } = useForm();
   const [universityData, setUniversityData] = useState<{ label: string, value: string, id: string }[]>([])
   const [collegeData, setCollegeData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [courseData, setCourseData] = useState<{ label: string, value: string, id: string }[]>([]);
   const [branchData, setBranchData] = useState<{ label: string, value: string, id: string }[]>([]);
- 
+
   const [filesData, setFilesData] = useState<{
     fileNote: FileNoteType;
     thumbnail: ThumbnailType;
@@ -37,35 +37,47 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
     fileNote: undefined,
     thumbnail: undefined,
   })
-    const fileBufferRef = useRef<Uint8Array | null>(null);
-  const [bufferLoading,setBufferLoading] = useState(false)
+  const fileBufferRef = useRef<Uint8Array | null>(null);
+  const [bufferLoading, setBufferLoading] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
-    setUploadLoading(true);
-    const res = await postUniversityOrCollegeOrCourseEtc({
-      university_name: data.university,
-      college_name: data.college,
-      course_name: data.course,
-      branch_name: data.branch,
-      year: data.year,
-      semester: data.semester,
-    })
+    try {
+      setUploadLoading(true);
+      const res = await postUniversityOrCollegeOrCourseEtc({
+        university_name: data.university,
+        college_name: data.college,
+        course_name: data.course,
+        branch_name: data.branch,
+        year: data.year,
+        semester: data.semester,
+      })
 
-    const res2 = await uploadFileServer({
-          fileBuffer: fileBufferRef.current,
-         path:filesData?.fileNote?.path
-    });
+      const res2 = await uploadFileServer({
+        fileBuffer: fileBufferRef.current,
+        path: filesData?.fileNote?.path
+      });
 
-    const res3 = await uploadImageServer({
-      filePath:filesData?.thumbnail?.filePath,
-      base64:filesData?.thumbnail?.base64,
-      contentType:filesData?.thumbnail?.contentType
-    });
-    const thumbnail_url = res3?.data?.fullPath;
-    const document_url = res2?.data?.fullPath ?? "";
+      if (res2.exists) {
+        Alert.alert("File Already Exist!")
+        return
+      }
 
-    const payload = {
+      const res3 = await uploadImageServer({
+        filePath: filesData?.thumbnail?.filePath,
+        base64: filesData?.thumbnail?.base64,
+        contentType: filesData?.thumbnail?.contentType
+      });
+
+      if (res3.exists) {
+        Alert.alert("Thumbnail Already Exist!")
+        return
+      }
+
+      const thumbnail_url = res3?.fileUrl ?? "";
+      const document_url = res2?.data?.fullPath ?? "";
+
+      const payload = {
         user_id: userId,
         title: data.title,
         description: data.description,
@@ -76,18 +88,22 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
         type: data.type,
         document_url,
         thumbnail_url
-    }
-    
-    const response = await postDocDetails(payload)
-    setUploadLoading(false)
+      }
 
-    if(response.status === 'success'){
+      const response = await postDocDetails(payload)
+      if (response.status === 'success') {
         Alert.alert("Notes Uploaded Successfully!");
         reset();
-    }else{
+      } else {
         Alert.alert("Error", response.msg || "Something went wrong")
+      }
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong while uploading the file.");
+    } finally {
+      setUploadLoading(false)
     }
   };
+
   const fetchData = async () => {
     const data = await getUniversity(null);
     setUniversityData(data)
@@ -190,7 +206,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
         control={control}
         rules={{ required: 'Description is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextAreaNE  onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined}  value={value} />
+          <TextAreaNE onChange={onChange} isRequired error={typeof error?.message === 'string' ? error.message : undefined} value={value} />
         )}
       />
 
@@ -208,7 +224,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
             onChange={onChange}
             isRequired
             error={typeof error?.message === 'string' ? error.message : undefined}
-            // value={value}
+          // value={value}
           />
         )}
       />
@@ -217,7 +233,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
       {fields.map((field) => (
         <View key={field} className="space-y-1">
           <View className="flex-row items-center justify-between">
-           {!(['year', 'semester'].includes(field)) && <CheckBoxNE
+            {!(['year', 'semester'].includes(field)) && <CheckBoxNE
               isChecked={fallbackFields[field]}
               onChange={() =>
                 setFallbackFields((prev) => ({ ...prev, [field]: !prev[field] }))
@@ -246,10 +262,10 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
                   title={capitalizeFirstLetter(field)}
                   error={typeof error?.message === 'string' ? error.message : undefined}
                   onChange={(e: any) => {
-                    listApiCall(field,e);
+                    listApiCall(field, e);
                     onChange(e);
                   }}
-                  // value={value}
+                // value={value}
                 />
               )
             }
@@ -273,7 +289,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
                 fileBufferRef.current = fileNote?.fileBuffer;
                 setFilesData(pre => ({
                   ...pre,
-                  fileNote:fileNoteMeta
+                  fileNote: fileNoteMeta
                 }))
                 onChange(fileNote?.path);
                 setBufferLoading(false)
@@ -283,7 +299,7 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
               <Text className="text-sm font-medium ">Choose Notes</Text>
               <View className="my-2 items-center justify-center rounded-xl bg-background-50 border border-dashed border-outline-300 h-[60px] w-full">
                 <UploadCloud className="h-[50px] w-[50px] stroke-background-200" />
-                {bufferLoading ? <ActivityIndicator size="small" color="#4A90E2" />   :<Text className="text-sm">
+                {bufferLoading ? <ActivityIndicator size="small" color="#4A90E2" /> : <Text className="text-sm">
                   {value ? value : 'Choose notes from device'}
                 </Text>}
               </View>
@@ -304,11 +320,11 @@ const UploadFileSheetNE = ({userId}:{userId:string}) => {
             <TouchableOpacity
               onPress={async () => {
                 const thumbnail = await selectImageByDevice();
-                  setFilesData(pre => ({
-                    ...pre,
-                    thumbnail
-                  }));
-                  onChange(thumbnail?.fileName);
+                setFilesData(pre => ({
+                  ...pre,
+                  thumbnail
+                }));
+                onChange(thumbnail?.fileName);
               }
               }
               className=""
