@@ -15,8 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { selectFileNoteByDevice, uploadFileServer } from '../../utils/FileUploadHelper';
-import { getBooksDetails } from '../../utils/getSupabaseApi';
+import { getBooksDetails, getThumbnailUrl } from '../../utils/getSupabaseApi';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -24,7 +23,7 @@ export default function HomeScreen() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [showActionsheet,setShowActionsheet] = useState(false)
   const [selectedPost, setSelectedPost] = useState<any>(null)
-   
+  const [bookData,setBookData] = useState<any>([]);
   const handleCloseActionSheetNE = () => setShowActionsheet(false);
 
   const quickActions = [
@@ -62,29 +61,14 @@ export default function HomeScreen() {
   ];
 
   const handleViewPDF = (uri: string, title: string) => {
-    router.push({ pathname: '/pdf-viewer', params: { uri, title } });
+    router.push({ pathname: `/pdf/${uri?.split("/")?.[2]}`, params: { uri, title } });
   };
 
-  const handleNoteUpload = async () => {
-    setUploadLoading(true);
-    const result = await selectFileNoteByDevice();
-    if (!result || !result.success || !result.fileBuffer || !result.path) {
-      setUploadLoading(false);
-      alert("Upload failed");
-      return;
-    }
-    const data = await uploadFileServer({ path: result.path, fileBuffer: result.fileBuffer });
-    setUploadLoading(false);
-    if (!data || data.error) alert("Upload failed");
-    else alert("PDF uploaded!");
-  }
-
-
   const fetch=async()=>{
-      const res = await getBooksDetails({page: 1,limit: 20});
+      const res = await getBooksDetails({page: 1,limit: 20, filters: {type:"book"}});
 
       if (res.success) {
-        console.log('Documents:', res.data);
+        setBookData(res.data);
         console.log('Total Pages:', res.totalPages);
       } else {
         Alert.alert('Fetch failed', res.error);
@@ -136,20 +120,20 @@ export default function HomeScreen() {
         <View className="px-3 mb-6">
           <Text className="text-xl font-bold text-gray-800 mb-4">Recent Books</Text>
           <FlatList
-            data={recentBooks}
+            data={bookData}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
                 className="w-36 bg-white rounded-xl p-2 items-center mr-4 shadow-sm"
-                onPress={() => handleViewPDF(item.uri, item.title)}
+                onPress={() => handleViewPDF(item.document_url, item.title)}
               >
-                <Image source={{ uri: item.thumbnail }} className="w-32 h-28 rounded-lg mb-2" />
+                <Image source={{ uri: getThumbnailUrl(item.thumbnail_url) }} className="w-32 h-28 rounded-lg mb-2" />
                 <Text className="text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={1}>{item.title}</Text>
                 <TouchableOpacity
                   className=" py-1 px-4 rounded"
-                  onPress={() => handleViewPDF(item.uri, item.title)}
+                  onPress={() => handleViewPDF(item.document_url, item.title)}
                 >
                   <Text className=" underline text-sm font-semibold text-blue-500">View</Text>
                 </TouchableOpacity>

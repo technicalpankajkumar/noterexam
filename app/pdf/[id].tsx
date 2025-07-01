@@ -11,7 +11,7 @@ const PdfById=()=> {
 const getPdfUrlByName = async (name: string) => {
   const { data, error } = await supabase
     .storage
-    .from('doc')
+    .from('file')
     .createSignedUrl(`pdfs/${id}`, 3600); // 1 hour URL
 
   if (error) {

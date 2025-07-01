@@ -30,6 +30,7 @@ export default function NotesScreen() {
     setLoading(true);
     let notes = await getAllPdf();
     setLoading(false);
+    console.log("Fetched notes:", notes);
     setNotes(notes);
   };
   useEffect(() => {

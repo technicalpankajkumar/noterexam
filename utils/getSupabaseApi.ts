@@ -184,7 +184,7 @@ export const postDocDetails = async (payload: {
 export const getAllPdf = async () => {
   const { data, error } = await supabase
     .storage
-    .from('doc')         // Bucket name
+    .from('file')         // Bucket name
     .list('pdfs', {      // Path (folder) inside the bucket
       limit: 100,        // Max files to return
       sortBy: { column: 'name', order: 'asc' }, // optional
@@ -324,7 +324,7 @@ export const getBooksDetails = async ({
   }
 };
 
-const getThumbnailUrl = (path:string) => {
+export const getThumbnailUrl = (path:string) => {
   return supabase
     .storage
     .from('thumbnails')
