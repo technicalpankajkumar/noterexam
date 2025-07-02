@@ -85,7 +85,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetch();
-  }, [isFocused])
+  }, []);
 
   return (
     <>

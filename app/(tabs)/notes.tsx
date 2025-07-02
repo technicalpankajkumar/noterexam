@@ -7,12 +7,13 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import { getAllPdf } from '../../utils/getSupabaseApi';
+import { getAllPdf, getSemesters, getYears } from '../../utils/getSupabaseApi';
 
 interface PdfFile {
   id: string;
@@ -25,7 +26,18 @@ export default function NotesScreen() {
   const [notes, setNotes] = useState<PdfFile[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const isFocused = useIsFocused();
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [semesterData, setSemesterData] = useState<any[]>([]);
+  const [yearData, setYearData] = useState<any[]>([]);
+
+   const fetchSemester = async ()=>{
+      const data = await getSemesters(null);
+      setSemesterData(data)
+    }
+    const fetchYear = async ()=>{
+      const data = await getYears(null);
+      setYearData(data)
+    }
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,7 +47,9 @@ export default function NotesScreen() {
   };
   useEffect(() => {
     fetchData();
-  }, [isFocused]);
+    fetchSemester();
+    fetchYear();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -65,27 +79,36 @@ export default function NotesScreen() {
       {/* Search Bar */}
       <View className="px-5 pt-12  bg-white">
         <InputNE
-          size='lg'
+          size='md'
           prefixIcon
           placeholder='Search notes....'
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
       </View>
-      <View className="px-3 pt-2">
-        <FlatList
-          data={categories}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
+      <View className="px-3 pt-2 bg-white">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+          {[{label:"All",value:''},...yearData].map((item) => (
             <TouchableOpacity
-              className="px-4  font-semibold rounded-xl p-2 items-center mr-4 shadow-sm bg-blue-400"
+              key={item.value}
+              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedCategory === item.value ? 'bg-blue-400' : 'bg-gray-200'}`}
+              onPress={() => setSelectedCategory(item.value)}
             >
-              <Text className="text-sm font-medium text-center text-white " numberOfLines={1}>{item}</Text>
+              <Text className={`text-sm font-medium text-center ${selectedCategory === item.value ? 'text-white' : 'text-gray-800'}`} numberOfLines={1}>{item.label}</Text>
             </TouchableOpacity>
-          )}
-        />
+          ))}
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+          {[{label:"All",value:''},...semesterData].map((item) => (
+            <TouchableOpacity
+              key={item.value}
+              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedCategory === item.value ? 'bg-blue-400' : 'bg-gray-200'}`}
+              onPress={() => setSelectedCategory(item.value)}
+            >
+              <Text className={`text-sm font-medium text-center ${selectedCategory === item.value ? 'text-white' : 'text-gray-800'}`} numberOfLines={1}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
       {/* Notes List */}
       {loading ? (
