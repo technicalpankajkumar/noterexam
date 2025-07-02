@@ -20,6 +20,7 @@ import { getBooksDetails } from '../../utils/getSupabaseApi';
 
 export default function HomeScreen() {
   const { user } = useAuth();
+  console.log('User:', user);
   const router = useRouter();
   const isFocused = useIsFocused()
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -62,7 +63,7 @@ export default function HomeScreen() {
   };
 
   const fetch = async () => {
-    const res = await getBooksDetails({ page: 1, limit: 20, filters: { type: "book" } });
+    const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book" } });
 
     if (res.success) {
       setBookData(res.data);
@@ -127,13 +128,7 @@ export default function HomeScreen() {
                   onPress={() => handleViewPDF(item.document_url, item.title)}
                 >
                   <Image source={{ uri: item.thumbnail_url ?? "https://fastly.picsum.photos/id/4/5000/3333.jpg?hmac=ghf06FdmgiD0-G4c9DdNM8RnBIN7BO0-ZGEw47khHP4" }} className="w-32 h-28 rounded-lg mb-2" />
-                  <Text className="text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={1}>{item.title}</Text>
-                  <TouchableOpacity
-                    className=" py-1 px-4 rounded"
-                    onPress={() => handleViewPDF(item.document_url, item.title)}
-                  >
-                    <Text className=" underline text-sm font-semibold text-blue-500">View</Text>
-                  </TouchableOpacity>
+                  <Text className="text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={2}>{item.title}</Text>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={<View className="flex flex-col items-center justify-evenly min-h-[130px] bg-white rounded-xl shadow-sm p-6">

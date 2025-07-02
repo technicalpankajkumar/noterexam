@@ -91,12 +91,12 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
         document_url,
         thumbnail_url
       }
-      console.log("Payload to postDocDetails:", payload);
-
       const response = await postDocDetails(payload);
+      console.log('Response:', response);
+      
       if (response.status === 'success') {
-        Alert.alert("Notes Uploaded Successfully!");
         reset();
+        Alert.alert("Notes Uploaded Successfully!");
       } else {
         Alert.alert("Error", response.msg || "Something went wrong")
       }
