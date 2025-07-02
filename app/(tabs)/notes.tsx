@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Bell, FileText } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   StatusBar,
@@ -30,7 +31,6 @@ export default function NotesScreen() {
     setLoading(true);
     let notes = await getAllPdf();
     setLoading(false);
-    console.log("Fetched notes:", notes);
     setNotes(notes);
   };
   useEffect(() => {
@@ -88,35 +88,39 @@ export default function NotesScreen() {
         />
       </View>
       {/* Notes List */}
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={{ padding: 15, paddingTop: 10 }}
-        ListEmptyComponent={() => (
-          <View className="items-center justify-center py-20">
-            <FileText size={64} color="#ccc" />
-            <Text className="text-xl font-bold text-gray-700 mt-4 mb-2">No notes found</Text>
-            <Text className="text-base text-gray-500 text-center px-10">
-              {searchQuery ? 'Try adjusting your search' : 'Create your first note to get started'}
-            </Text>
-          </View>
-        )}
-        renderItem={({ item }) => (
-              <View>
-                <TouchableOpacity className="bg-white rounded-lg p-3 mb-2 shadow-sm"  onPress={() => {
-                  router.push(`/pdf/${item.name}`);
-                }}>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-800 flex-1 font-semibold">{item.name}</Text>
-                <FileText size={16} color="#666" />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
+      )
+        :
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={{ padding: 15, paddingTop: 10 }}
+          ListEmptyComponent={() => (
+            <View className="items-center justify-center py-20">
+              <FileText size={64} color="#ccc" />
+              <Text className="text-xl font-bold text-gray-700 mt-4 mb-2">No notes found</Text>
+              <Text className="text-base text-gray-500 text-center px-10">
+                {searchQuery ? 'Try adjusting your search' : 'Create your first note to get started'}
+              </Text>
             </View>
+          )}
+          renderItem={({ item }) => (
+            <View>
+              <TouchableOpacity className="bg-white rounded-lg p-3 mb-2 shadow-sm" onPress={() => {
+                router.push(`/pdf/${item.name}`);
+              }}>
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-sm text-gray-800 flex-1 font-semibold">{item.name}</Text>
+                  <FileText size={16} color="#666" />
+                </View>
               </TouchableOpacity>
-              </View>
-        )}
-      />
+            </View>
+          )}
+        />}
     </View>
   );
 }

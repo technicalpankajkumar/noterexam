@@ -10,12 +10,11 @@ import {
   Alert,
   FlatList,
   Image,
-  RefreshControl,
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { getBooksDetails } from '../../utils/getSupabaseApi';
 
@@ -25,9 +24,8 @@ export default function HomeScreen() {
   const isFocused = useIsFocused()
   const [uploadLoading, setUploadLoading] = useState(false);
   const [showActionsheet, setShowActionsheet] = useState(false)
-  const [selectedPost, setSelectedPost] = useState<any>(null)
+  const [refreshing, setRefreshing] = useState<boolean>(false)
   const [bookData, setBookData] = useState<any>([]);
-  const handleCloseActionSheetNE = () => setShowActionsheet(false);
 
   const quickActions = [
     { id: 1, title: 'Upload Notes', icon: '📝', color: 'bg-blue-500' },
@@ -63,15 +61,27 @@ export default function HomeScreen() {
   };
 
   const fetch = async () => {
-    const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book" } });
-
-    if (res.success) {
-      setBookData(res.data);
-      console.log('Total Pages:', res.totalPages);
-    } else {
-      Alert.alert('Fetch failed', res.error);
+    setRefreshing(true);
+    try {
+      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book" } });
+      if (res.success) {
+        setBookData(res.data);
+        console.log('Total Pages:', res.totalPages);
+      } else {
+        Alert.alert('Fetch failed', res.error);
+      }
+    } catch (error) {
+      Alert.alert("Error fetching data:", error?.toString() || "Something went wrong");
+    } finally {
+      setRefreshing(false);
     }
   }
+
+  const handleCloseActionSheetNE = () => {
+    setShowActionsheet(false);
+    fetch();
+  };
+
 
   useEffect(() => {
     fetch();
@@ -117,6 +127,10 @@ export default function HomeScreen() {
           {/* Recent Books */}
           <View className="px-3 mb-6">
             <Text className="text-xl font-bold text-gray-800 mb-4">Recent Books</Text>
+           { refreshing ? (
+            <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
+          )
+           :
             <FlatList
               data={bookData}
               horizontal
@@ -132,12 +146,12 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               )}
               ListEmptyComponent={<View className="flex flex-col items-center justify-evenly min-h-[130px] bg-white rounded-xl shadow-sm p-6">
-                          <FileText size={30} color={'#9ca3af'} />
-                          <Text className="text-sm text-gray-400 mb-1">No Book Available</Text>
-                        </View>
+                <FileText size={30} color={'#9ca3af'} />
+                <Text className="text-sm text-gray-400 mb-1">No Book Available</Text>
+              </View>
               }
-              refreshControl={<RefreshControl refreshing={uploadLoading} onRefresh={fetch} />}
             />
+}
           </View>
 
           {/* Course-wise PDFs */}
@@ -188,7 +202,7 @@ export default function HomeScreen() {
       {
         showActionsheet && <View>
           <ActionSheetNE
-            children={<UploadFileSheetNE userId={user?.id} handleCloseActionSheetNE={handleCloseActionSheetNE}/>}
+            children={<UploadFileSheetNE userId={user?.id} handleCloseActionSheetNE={handleCloseActionSheetNE} />}
             showActionsheet={showActionsheet}
             setShowActionsheet={setShowActionsheet}
             handleClose={handleCloseActionSheetNE}
