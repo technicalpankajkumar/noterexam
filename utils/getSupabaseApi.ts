@@ -8,7 +8,6 @@ const handleQuery = ({ query, searchTerm }: { query: any; searchTerm?: string | 
       query = query.ilike("name", `%${searchTerm.trim()}%`);
     }
 }
-
 export const getUniversity = async (searchTerm: string | null) => {
     let query = supabase.from('universities').select('*').order('name', { ascending: true }).limit(50);
     
@@ -22,10 +21,8 @@ export const getUniversity = async (searchTerm: string | null) => {
     return data?.map((item) => ({
         label: item.name,
         value: item.id,
-        id:item.id
     })) || [];
 }
-
 export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: string | null; universityId: string; }) => {
   let query = supabase.from("colleges").select("*").eq("university_id", universityId).order("name", { ascending: true }).limit(50);
 
@@ -41,11 +38,9 @@ export const getColleges = async ({ searchTerm, universityId }: { searchTerm?: s
     data?.map((item) => ({
       label: item.name,
       value: item.id,
-      id: item.id,
     })) || []
   );
 };
-
 export const getCourses = async ({ searchTerm, collegeId }: { searchTerm?: string, collegeId: string }) => {
     const query = supabase.from('courses').select('*').eq('college_id', collegeId).order('name', { ascending: true }).limit(50);
 
@@ -58,10 +53,8 @@ export const getCourses = async ({ searchTerm, collegeId }: { searchTerm?: strin
     return data?.map((item) => ({
         label: item.name,
         value: item.id,
-        id: item.id,
     })) || [];
 }
-
 export const getBranches = async ({ searchTerm, courseId }: { searchTerm?: string, courseId: string }) => {
     const query = supabase.from('branches').select('*').eq('course_id', courseId).order('name', { ascending: true }).limit(50);
 
@@ -74,10 +67,38 @@ export const getBranches = async ({ searchTerm, courseId }: { searchTerm?: strin
     return data?.map((item) => ({
         label: item.name,
         value: item.id,
-        id: item.id,
     })) || [];
 }
+export const getSemesters = async (searchTerm: string | null) => {
+    let query = supabase.from('semesters').select('*').order('name', { ascending: true });
+    
+    handleQuery({query,searchTerm})
 
+    const { data, error } = await query;
+
+    if (error) {
+        Alert.alert("Semester fetching error!")
+    }
+    return data?.map((item) => ({
+        label: item.name,
+        value: item.id,
+    })) || [];
+}
+export const getYears = async (searchTerm: string | null) => {
+    let query = supabase.from('years').select('*').order('name', { ascending: true });
+    
+    handleQuery({query,searchTerm})
+
+    const { data, error } = await query;
+
+    if (error) {
+        Alert.alert("Years fetching error!")
+    }
+    return data?.map((item) => ({
+        label: item.name,
+        value: item.id,
+    })) || [];
+}
 export const postUniversityOrCollegeOrCourseEtc = async (payload: {
   university_name: string,
   college_name: string,
@@ -128,7 +149,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
 
     if (branchError || !branch_id) throw new Error(branchError?.message || 'Failed to get/create branch');
 
-    const { data, error } = await supabase
+    const { data:branch_year_semesters_id, error } = await supabase
         .from('branch_year_semesters')
         .insert([
           {
@@ -136,32 +157,32 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
             year_id,
             semester_id
           }
-        ]);
-    if (error || !data) throw new Error(error?.message || 'Failed to add year/semester to branch');
+        ]).select('id');;
+    if (error || !branch_year_semesters_id) throw new Error(error?.message || 'Failed to add year/semester to branch');
     
     return {
       university_id,
       college_id,
       course_id,
       branch_id,
+      branch_year_semesters_id
     };
   } catch (err: any) {
     console.error('Error in post university or college or course etc:', err.message);
     return { error: err.message };
   }
 };
-
 export const postDocDetails = async (payload: {
     user_id: string,
     title: string,
     description: string,
-    document_url: string,
-    university_id: string,
-    college_id: string,
-    course_id: string,
-    branch_id: string,
-    thumbnail_url?: string,
     type:'quantum' | 'book' | 'notes'; 
+    document_url: string,
+    thumbnail_url?: string,
+    university_id: string,
+    college_id:string,
+    course_id: string,
+    branch_year_semesters_id:string,
 }) => {
      try {
     const { data, error } = await supabase.from('doc_details').insert([
@@ -174,10 +195,10 @@ export const postDocDetails = async (payload: {
         university_id: payload.university_id,
         college_id: payload.college_id,
         course_id: payload.course_id,
-        branch_id: payload.branch_id,
+        branch_year_semesters_id: payload.branch_year_semesters_id,
         type: payload.type,
       },
-    ]).select(); // optional: return inserted rows
+    ]).select('id'); // optional: return inserted rows
 
     if (error) {
       return { status: "error", msg: error.message };

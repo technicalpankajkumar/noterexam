@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { capitalizeFirstLetter } from "../../helpers/capitalizeFirstLetter";
 import { selectFileNoteByDevice, selectImageByDevice, uploadFileServer, uploadImageServer } from "../../utils/FileUploadHelper";
-import { getBranches, getColleges, getCourses, getUniversity, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
+import { getBranches, getColleges, getCourses, getSemesters, getUniversity, getYears, postDocDetails, postUniversityOrCollegeOrCourseEtc } from "../../utils/getSupabaseApi";
 import ButtonNE from "./ButtonNE";
 import CheckBoxNE from "./CheckBoxNE";
 import InputNE from "./InputNE";
@@ -25,10 +25,12 @@ type ThumbnailType =
 const UploadFileSheetNE = ({ userId }: { userId: string }) => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
   const { control, handleSubmit, formState: { errors }, watch, reset } = useForm();
-  const [universityData, setUniversityData] = useState<{ label: string, value: string, id: string }[]>([])
-  const [collegeData, setCollegeData] = useState<{ label: string, value: string, id: string }[]>([]);
-  const [courseData, setCourseData] = useState<{ label: string, value: string, id: string }[]>([]);
-  const [branchData, setBranchData] = useState<{ label: string, value: string, id: string }[]>([]);
+  const [universityData, setUniversityData] = useState<{ label: string, value: string }[]>([])
+  const [collegeData, setCollegeData] = useState<{ label: string, value: string }[]>([]);
+  const [courseData, setCourseData] = useState<{ label: string, value: string }[]>([]);
+  const [branchData, setBranchData] = useState<{ label: string, value: string }[]>([]);
+  const [semesterData, setSemesterData] = useState<{ label: string, value: string }[]>([]);
+  const [yearData, setYearData] = useState<{ label: string, value: string }[]>([]);
 
   const [filesData, setFilesData] = useState<{
     fileNote: FileNoteType;
@@ -84,11 +86,12 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
         university_id: res.university_id,
         college_id: res.college_id,
         course_id: res.course_id,
-        branch_id: res.branch_id,
+        branch_year_semesters_id: res.branch_year_semesters_id,
         type: data.type,
         document_url,
         thumbnail_url
       }
+      console.log("Payload to postDocDetails:", payload);
 
       const response = await postDocDetails(payload)
       if (response.status === 'success') {
@@ -104,52 +107,38 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchUniversity = async () => {
     const data = await getUniversity(null);
     setUniversityData(data)
   };
   const fetchColleges = async (universityId: string) => {
-    const data = await getColleges({
-      searchTerm: null,
-      universityId
-    })
+    const data = await getColleges({ searchTerm: null, universityId })
     setCollegeData(data)
   }
   const fetchCourse = async (collegeId: string) => {
-    const data = await getCourses({
-      collegeId
-    })
+    const data = await getCourses({ collegeId })
     setCourseData(data)
   }
   const fetchBranches = async (courseId: string) => {
-    const data = await getBranches({
-      courseId
-    })
+    const data = await getBranches({ courseId })
     setBranchData(data)
   }
-
-
+  const fetchSemester = async ()=>{
+    const data = await getSemesters(null);
+    setSemesterData(data)
+  }
+  const fetchYear = async ()=>{
+    const data = await getYears(null);
+    setYearData(data)
+  }
 
   useEffect(() => {
-    fetchData();
+    fetchUniversity();
+    fetchSemester();
+    fetchYear();
   }, []);
 
   const fields = ['university', 'college', 'course', 'branch', 'year', 'semester'];
-  const yearData = [
-    { label: '1st Year', value: '1', id: '1' },
-    { label: '2nd Year', value: '2', id: '2' },
-    { label: '3rd Year', value: '3', id: '3' },
-    { label: '4th Year', value: '4', id: '4' },
-    { label: '5th Year', value: '5', id: '5' },
-  ];
-  const semesterData = [
-    { label: '1st Semester', value: '1', id: '1' },
-    { label: '2nd Semester', value: '2', id: '2' },
-    { label: '3rd Semester', value: '3', id: '3' },
-    { label: '4th Semester', value: '4', id: '4' },
-    { label: '5th Semester', value: '5', id: '5' },
-    { label: '6th Semester', value: '6', id: '6' },
-  ];
   const returnFieldWiseList = (field: string) => {
     switch (field) {
       case 'university':
@@ -250,7 +239,7 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
               return fallbackFields[field] ? (
                 <InputNE
                   placeholder={`Enter ${field}`}
-                  value={value}
+                  value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.value || ''}
                   onChangeText={onChange}
                   title={capitalizeFirstLetter(field)}
                   error={typeof error?.message === 'string' ? error.message : undefined}
@@ -265,7 +254,7 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
                     listApiCall(field, e);
                     onChange(e);
                   }}
-                // value={value}
+                value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.value || ''} // Ensure value is set correctly
                 />
               )
             }

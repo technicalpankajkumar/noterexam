@@ -9,7 +9,7 @@ interface SelectNEProps {
     title?: string;
     isRequired?: boolean;
     onChange?: (e: any) => void;
-    options?: { id: string, label: string, value: string }[];
+    options?: { label: string, value: string }[];
     placeholder?:string;
     value?: string;
 }
@@ -52,7 +52,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
                         </SelectDragIndicatorWrapper>
                         {
                             options?.map(res =>{
-                                return <SelectItem key={res.id} label={res.label} value={res.value} />
+                                return <SelectItem key={res.value} label={res.label} value={res.value} />
                             })
                         }
                     </SelectContent>
