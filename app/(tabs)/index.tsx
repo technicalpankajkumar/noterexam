@@ -136,6 +136,11 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 </TouchableOpacity>
               )}
+              ListEmptyComponent={<View className="flex flex-col items-center justify-evenly min-h-[130px] bg-white rounded-xl shadow-sm p-6">
+                          <FileText size={30} color={'#9ca3af'} />
+                          <Text className="text-sm text-gray-400 mb-1">No Book Available</Text>
+                        </View>
+              }
             />
           </View>
 

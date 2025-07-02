@@ -93,7 +93,7 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
       }
       console.log("Payload to postDocDetails:", payload);
 
-      const response = await postDocDetails(payload)
+      const response = await postDocDetails(payload);
       if (response.status === 'success') {
         Alert.alert("Notes Uploaded Successfully!");
         reset();
@@ -137,6 +137,12 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
     fetchSemester();
     fetchYear();
   }, []);
+
+  const notesTypeList = [
+              { label: 'Book', value: 'book' },
+              { label: 'Model/Quantum Paper', value: 'quantum'},
+              { label: 'Notes', value: 'notes'}
+            ]
 
   const fields = ['university', 'college', 'course', 'branch', 'year', 'semester'];
   const returnFieldWiseList = (field: string) => {
@@ -205,15 +211,11 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
         rules={{ required: 'Type is required' }}
         render={({ field: { onChange, value }, fieldState: { error } }) => (
           <SelectNE
-            options={[
-              { label: 'Book', value: 'book', id: '1' },
-              { label: 'Model/Quantum Paper', value: 'quantum', id: '2' },
-              { label: 'Notes', value: 'notes', id: '3' }
-            ]}
+            options={notesTypeList}
             onChange={onChange}
             isRequired
             error={typeof error?.message === 'string' ? error.message : undefined}
-          // value={value}
+            value={notesTypeList?.filter((item) => item.value === value)[0]?.label || ''}
           />
         )}
       />
@@ -239,7 +241,7 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
               return fallbackFields[field] ? (
                 <InputNE
                   placeholder={`Enter ${field}`}
-                  value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.value || ''}
+                  value={value}
                   onChangeText={onChange}
                   title={capitalizeFirstLetter(field)}
                   error={typeof error?.message === 'string' ? error.message : undefined}
@@ -254,7 +256,7 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
                     listApiCall(field, e);
                     onChange(e);
                   }}
-                value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.value || ''} // Ensure value is set correctly
+                value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.label || ''} // Ensure value is set correctly
                 />
               )
             }

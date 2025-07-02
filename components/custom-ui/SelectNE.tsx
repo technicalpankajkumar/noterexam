@@ -40,7 +40,7 @@ const SelectNE: React.FC<SelectNEProps> = ({
             <Select onValueChange={onChange} >
                 <SelectTrigger>
                     <SelectInput size="md" placeholder={placeholder} className="flex-1 h-10" 
-                    // value={value}
+                    value={value}
                     />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
                 </SelectTrigger>

@@ -149,7 +149,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
 
     if (branchError || !branch_id) throw new Error(branchError?.message || 'Failed to get/create branch');
 
-    const { data:branch_year_semesters_id, error } = await supabase
+    const { data, error } = await supabase
         .from('branch_year_semesters')
         .insert([
           {
@@ -158,14 +158,14 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
             semester_id
           }
         ]).select('id');;
-    if (error || !branch_year_semesters_id) throw new Error(error?.message || 'Failed to add year/semester to branch');
+    if (error || !data) throw new Error(error?.message || 'Failed to add year/semester to branch');
     
     return {
       university_id,
       college_id,
       course_id,
       branch_id,
-      branch_year_semesters_id
+      branch_year_semesters_id: data[0].id
     };
   } catch (err: any) {
     console.error('Error in post university or college or course etc:', err.message);
@@ -290,21 +290,7 @@ export const getBooksDetails = async ({
 
     let query = supabase
       .from('doc_details')
-      .select( `
-        id,
-        title,
-        description,
-        type,
-        document_url,
-        thumbnail_url,
-        university_id,
-        college_id,
-        course_id,
-        branch_id,
-        created_at
-      `,
-        { count: 'exact' }
-      )
+      .select()
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -319,8 +305,6 @@ export const getBooksDetails = async ({
       college_id,
       course_id,
       branch_id,
-      year_number,
-      semester_number,
       type,
     } = filters;
 
