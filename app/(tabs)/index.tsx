@@ -10,6 +10,7 @@ import {
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   StatusBar,
   Text,
@@ -20,7 +21,6 @@ import { getBooksDetails } from '../../utils/getSupabaseApi';
 
 export default function HomeScreen() {
   const { user } = useAuth();
-  console.log('User:', user);
   const router = useRouter();
   const isFocused = useIsFocused()
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -136,6 +136,7 @@ export default function HomeScreen() {
                           <Text className="text-sm text-gray-400 mb-1">No Book Available</Text>
                         </View>
               }
+              refreshControl={<RefreshControl refreshing={uploadLoading} onRefresh={fetch} />}
             />
           </View>
 
@@ -187,7 +188,7 @@ export default function HomeScreen() {
       {
         showActionsheet && <View>
           <ActionSheetNE
-            children={<UploadFileSheetNE userId={user?.id} />}
+            children={<UploadFileSheetNE userId={user?.id} handleCloseActionSheetNE={handleCloseActionSheetNE}/>}
             showActionsheet={showActionsheet}
             setShowActionsheet={setShowActionsheet}
             handleClose={handleCloseActionSheetNE}

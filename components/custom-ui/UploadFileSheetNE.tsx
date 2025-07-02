@@ -22,7 +22,7 @@ type ThumbnailType =
   | undefined;
 
 
-const UploadFileSheetNE = ({ userId }: { userId: string }) => {
+const UploadFileSheetNE = ({ userId ,handleCloseActionSheetNE}: { userId: string,handleCloseActionSheetNE:()=>void }) => {
   const [fallbackFields, setFallbackFields] = useState<Record<string, boolean>>({});
   const { control, handleSubmit, formState: { errors }, watch, reset } = useForm();
   const [universityData, setUniversityData] = useState<{ label: string, value: string }[]>([])
@@ -92,10 +92,10 @@ const UploadFileSheetNE = ({ userId }: { userId: string }) => {
         thumbnail_url
       }
       const response = await postDocDetails(payload);
-      console.log('Response:', response);
-      
+
       if (response.status === 'success') {
         reset();
+        handleCloseActionSheetNE();
         Alert.alert("Notes Uploaded Successfully!");
       } else {
         Alert.alert("Error", response.msg || "Something went wrong")
