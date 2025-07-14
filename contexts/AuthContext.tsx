@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         university_id,
         college_id,
         course_id,
+        type,
         branch_year_semesters_id,
         branch_year_semesters (
           id,
