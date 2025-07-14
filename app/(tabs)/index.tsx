@@ -1,5 +1,3 @@
-import ActionSheetNE from '@components/custom-ui/ActionSheetNE';
-import UploadFileSheetNE from '@components/custom-ui/UploadFileSheetNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -226,6 +224,7 @@ export default function HomeScreen() {
               numColumns={numColumns}
               key={numColumns} // Forces FlatList to re-render if numColumns changes
               showsHorizontalScrollIndicator={false}
+              horizontal
               keyExtractor={(item) => item.id}
               columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between',flexDirection:'row' } : undefined}
               renderItem={({ item }) => (
@@ -278,12 +277,12 @@ export default function HomeScreen() {
         </ScrollView>
 
         {/* Floating Action Button */}
-       { <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg" onPress={()=>setShowActionsheet(true)}>
+       { <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg" onPress={()=>router.push('/pdf')}>
           <Plus size={24} color="white" />
         </TouchableOpacity>}
 
       </View>
-      {
+      {/* {
         showActionsheet && <View>
           <ActionSheetNE
             children={<UploadFileSheetNE userId={user?.id} handleCloseActionSheetNE={handleCloseActionSheetNE} />}
@@ -292,7 +291,7 @@ export default function HomeScreen() {
             handleClose={handleCloseActionSheetNE}
           />
         </View>
-      }
+      } */}
     </>
   );
 }
