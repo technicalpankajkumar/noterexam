@@ -66,7 +66,6 @@ export default function HomeScreen() {
       const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book" } });
       if (res.success) {
         setBookData(res.data);
-        console.log('Total Pages:', res.totalPages);
       } else {
         Alert.alert('Fetch failed', res.error);
       }

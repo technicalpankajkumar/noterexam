@@ -1,21 +1,201 @@
+DROP TABLE IF EXISTS profiles CASCADE;
+DROP TYPE IF EXISTS role;
+
+create type role as enum ('admin', 'student', 'coordinator');
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
+  name text not null,
+  mobile text not null,
+  profile_image text,
+  university_id uuid references universities(id),
+  college_id uuid references colleges(id),
+  course_id uuid references courses(id),
+  branch_year_semesters_id uuid references branch_year_semesters(id),
+  type role DEFAULT 'student' not null,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+alter table profiles enable row level security;
+
+-- Allow users to select/update their own profile
+create policy "Users can view their own profile" on profiles
+  for select using (auth.uid() = id);
+
+create policy "Users can update their own profile" on profiles
+  for update using (auth.uid() = id);
+
+create policy "Users can insert their own profile" on profiles
+  for insert with check (auth.uid() = id);
+
+================================================
+================================================
+create policy "Authenticated users can access their images" on storage.objects
+  for all
+  using (
+    bucket_id = 'profile-images'
+    AND auth.role() = 'authenticated'
+  );
+
+  ================================================
+================================================
+
+
+-- Allow uploads by authenticated users
+CREATE POLICY "Allow uploads by authenticated users"
+ON storage.objects
+FOR INSERT
+WITH CHECK (
+  auth.role() = 'authenticated'
+);
+
+-- Allow reading by all authenticated users
+CREATE POLICY "Allow read access to all authenticated users"
+ON storage.objects
+FOR SELECT
+USING (
+  auth.role() = 'authenticated'
+);
+
+-- Allow deleting own files only
+CREATE POLICY "Allow delete own files"
+ON storage.objects
+FOR DELETE
+USING (
+  auth.role() = 'authenticated' AND storage.objects.owner = auth.uid()
+);
+
+  ================================================
+================================================
+
+
+DROP TABLE IF EXISTS doc_details CASCADE;
+DROP TYPE IF EXISTS doc_type;
+
+create type doc_type as enum ('quantum', 'book', 'notes');
+create table doc_details (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id),
+  title text not null,
+  description text,
+  type doc_type not null,
+  document_url text not null,
+  thumbnail_url text not null,
+  university_id uuid references universities(id),
+  college_id uuid references colleges(id),
+  course_id uuid references courses(id),
+  branch_year_semesters_id uuid references branch_year_semesters(id),
+  created_at timestamp default now()
+);
+
+
+  ================================================
+================================================
+
+DROP TABLE IF EXISTS universities CASCADE;
+DROP TABLE IF EXISTS colleges CASCADE;
+DROP TABLE IF EXISTS courses CASCADE;
+DROP TABLE IF EXISTS branches CASCADE;
+-- DROP TABLE IF EXISTS semesters CASCADE;
+-- DROP TABLE IF EXISTS years CASCADE;
+
+-- Universities
+create table universities (
+  id uuid primary key default uuid_generate_v4(),
+  name text unique not null,
+  created_at timestamp default now()
+);
+
+-- Colleges (can be linked to a university OR self-standing)
+create table colleges (
+  id uuid primary key default uuid_generate_v4(),
+  university_id uuid references universities(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Courses
+create table courses (
+  id uuid primary key default uuid_generate_v4(),
+  college_id uuid references colleges(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Branches
+create table branches (
+  id uuid primary key default uuid_generate_v4(),
+  course_id uuid references courses(id) on delete cascade,
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Semesters
+create table semesters (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null,
+  created_at timestamp default now()
+);
+
+-- Years
+create table years (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null,
+  created_at timestamp default now()
+);
+
+create table branch_year_semesters (
+  id uuid primary key default uuid_generate_v4(),
+  branch_id uuid references branches(id) on delete cascade,
+  year_id uuid references years(id) on delete cascade,
+  semester_id uuid references semesters(id) on delete cascade,
+  created_at timestamp default now()
+);
+  ================================================
+================================================
+-- DROP FUNCTION IF EXISTS find_or_create_university(TEXT);
+-- DROP FUNCTION IF EXISTS find_or_create_college(TEXT);
+-- DROP FUNCTION IF EXISTS find_or_create_course(TEXT);
+-- DROP FUNCTION IF EXISTS find_or_create_branch(TEXT);
+
+
 CREATE OR REPLACE FUNCTION find_or_create_university(p_name TEXT)
 RETURNS UUID AS $$
 DECLARE
   v_university_id UUID;
+  v_parsed_uuid UUID;
 BEGIN
-  -- Try to find the university (case-insensitive)
+  -- 1. Try casting p_name to UUID (treat as ID if valid UUID)
+  BEGIN
+    v_parsed_uuid := p_name::UUID;
+
+    SELECT id INTO v_university_id
+    FROM universities
+    WHERE id = v_parsed_uuid;
+
+    IF v_university_id IS NOT NULL THEN
+      RETURN v_university_id; -- ✅ Found by UUID
+    END IF;
+  EXCEPTION
+    WHEN invalid_text_representation THEN
+      -- p_name is not a UUID, continue to name search
+      NULL;
+  END;
+
+  -- 2. Try to find by name (case-insensitive)
   SELECT id INTO v_university_id
   FROM universities
   WHERE LOWER(name) = LOWER(p_name);
 
-  -- If not found, insert a new one
-  IF v_university_id IS NULL THEN
-    INSERT INTO universities(name)
-    VALUES (p_name)
-    RETURNING id INTO v_university_id;
+  IF v_university_id IS NOT NULL THEN
+    RETURN v_university_id;
   END IF;
 
-  -- Return the university ID
+  -- 3. Insert new university
+  INSERT INTO universities(name)
+  VALUES (p_name)
+  RETURNING id INTO v_university_id;
+
   RETURN v_university_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -24,63 +204,146 @@ CREATE OR REPLACE FUNCTION find_or_create_college(p_name TEXT, p_university_id U
 RETURNS UUID AS $$
 DECLARE
   v_id UUID;
+  v_parsed_uuid UUID;
 BEGIN
+  -- Step 1: Try to parse p_name as UUID and find by ID
+  BEGIN
+    v_parsed_uuid := p_name::UUID;
+
+    SELECT id INTO v_id
+    FROM colleges
+    WHERE id = v_parsed_uuid AND university_id = p_university_id;
+
+    IF v_id IS NOT NULL THEN
+      RETURN v_id; -- ✅ Found by college UUID
+    END IF;
+  EXCEPTION WHEN invalid_text_representation THEN
+    -- p_name is not a UUID — treat it as a name
+    NULL;
+  END;
+
+  -- Step 2: Try to find by name (case-insensitive) + university_id
   SELECT id INTO v_id
   FROM colleges
   WHERE LOWER(name) = LOWER(p_name) AND university_id = p_university_id;
 
-  IF NOT FOUND THEN
-    INSERT INTO colleges(name, university_id)
-    VALUES (p_name, p_university_id)
-    RETURNING id INTO v_id;
+  IF v_id IS NOT NULL THEN
+    RETURN v_id; -- ✅ Found by name
   END IF;
+
+  -- Step 3: Insert new college with name and university_id
+  INSERT INTO colleges(name, university_id)
+  VALUES (p_name, p_university_id)
+  RETURNING id INTO v_id;
 
   RETURN v_id;
 END;
 $$ LANGUAGE plpgsql;
 
--- //find or create coureses
-
+-- -- //find or create coureses
 CREATE OR REPLACE FUNCTION find_or_create_course(p_name TEXT, p_college_id UUID)
 RETURNS UUID AS $$
 DECLARE
   v_id UUID;
+  v_parsed_uuid UUID;
 BEGIN
+  -- Step 1: Try to cast p_name to UUID and search by ID + college_id
+  BEGIN
+    v_parsed_uuid := p_name::UUID;
+
+    SELECT id INTO v_id
+    FROM courses
+    WHERE id = v_parsed_uuid AND college_id = p_college_id;
+
+    IF v_id IS NOT NULL THEN
+      RETURN v_id; -- ✅ Found by UUID
+    END IF;
+  EXCEPTION WHEN invalid_text_representation THEN
+    -- Not a UUID, treat as name
+    NULL;
+  END;
+
+  -- Step 2: Check if course exists by name (case-insensitive) and college
   SELECT id INTO v_id
   FROM courses
   WHERE LOWER(name) = LOWER(p_name) AND college_id = p_college_id;
 
-  IF NOT FOUND THEN
-    INSERT INTO courses(name, college_id)
-    VALUES (p_name, p_college_id)
-    RETURNING id INTO v_id;
+  IF v_id IS NOT NULL THEN
+    RETURN v_id; -- ✅ Found by name
   END IF;
+
+  -- Step 3: Insert new course
+  INSERT INTO courses(name, college_id)
+  VALUES (p_name, p_college_id)
+  RETURNING id INTO v_id;
 
   RETURN v_id;
 END;
 $$ LANGUAGE plpgsql;
 
--- find or create branches
+-- -- find or create branches
 CREATE OR REPLACE FUNCTION find_or_create_branch(
   p_name TEXT,
-  p_year TEXT,
-  p_semester TEXT,
   p_course_id UUID
+)
+RETURNS UUID AS $$
+DECLARE
+  v_id UUID;
+  v_parsed_uuid UUID;
+BEGIN
+  -- Step 1: Try to parse p_name as UUID and search by ID + course_id
+  BEGIN
+    v_parsed_uuid := p_name::UUID;
+
+    SELECT id INTO v_id
+    FROM branches
+    WHERE id = v_parsed_uuid AND course_id = p_course_id;
+
+    IF v_id IS NOT NULL THEN
+      RETURN v_id; -- ✅ Found by UUID
+    END IF;
+  EXCEPTION WHEN invalid_text_representation THEN
+    -- Not a UUID, fallback to name
+    NULL;
+  END;
+
+  -- Step 2: Try to find by name (case-insensitive) and course
+  SELECT id INTO v_id
+  FROM branches
+  WHERE LOWER(name) = LOWER(p_name) AND course_id = p_course_id;
+
+  IF v_id IS NOT NULL THEN
+    RETURN v_id; -- ✅ Found by name
+  END IF;
+
+  -- Step 3: Insert new branch
+  INSERT INTO branches(name, course_id)
+  VALUES (p_name, p_course_id)
+  RETURNING id INTO v_id;
+
+  RETURN v_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION find_or_create_branch_year_semester(
+  p_branch_id UUID,
+  p_year_id UUID,
+  p_semester_id UUID
 )
 RETURNS UUID AS $$
 DECLARE
   v_id UUID;
 BEGIN
   SELECT id INTO v_id
-  FROM branches
-  WHERE LOWER(name) = LOWER(p_name)
-    AND year = p_year
-    AND semester = p_semester
-    AND course_id = p_course_id;
+  FROM branch_year_semesters
+  WHERE branch_id = p_branch_id
+    AND year_id = p_year_id
+    AND semester_id = p_semester_id;
 
-  IF NOT FOUND THEN
-    INSERT INTO branches(name, year, semester, course_id)
-    VALUES (p_name, p_year, p_semester, p_course_id)
+  IF v_id IS NULL THEN
+    INSERT INTO branch_year_semesters(branch_id, year_id, semester_id)
+    VALUES (p_branch_id, p_year_id, p_semester_id)
     RETURNING id INTO v_id;
   END IF;
 
