@@ -224,7 +224,6 @@ export default function HomeScreen() {
               numColumns={numColumns}
               key={numColumns} // Forces FlatList to re-render if numColumns changes
               showsHorizontalScrollIndicator={false}
-              horizontal
               keyExtractor={(item) => item.id}
               columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between',flexDirection:'row' } : undefined}
               renderItem={({ item }) => (
