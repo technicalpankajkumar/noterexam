@@ -8,14 +8,14 @@ export default function PDFViewer({ uri, loading }: { uri: string, loading?: boo
     const pdfjsViewer = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(uri)}`;
 
     return (
-        <View className="flex-1 bg-gray-100">
+        <View className="flex-1 bg-gray-100 pt-4">
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
             {/* Header */}
-            <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 bg-white border-b border-gray-200">
-                <Text className="text-xl font-bold text-gray-800 mt-1">View Notes</Text>
+            <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-end items-center px-2 pt-2 bg-gray-50 h-4"></View>
+            <View className="absolute top-0 right-0 z-10 flex-row justify-end items-center px-2 pt-2 bg-gray-50">
                 <View className="flex-row space-x-3">
-                    <TouchableOpacity className="p-2">
-                        <Bell size={24} color="#333" />
+                    <TouchableOpacity className="pt-4 px-2">
+                        <Bell size={20} color="#333" />
                     </TouchableOpacity>
                 </View>
             </View>

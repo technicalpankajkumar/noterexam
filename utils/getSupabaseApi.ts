@@ -114,7 +114,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
     const { data: universityData, error: universityError } = await supabase
       .rpc('find_or_create_university', { p_name: university_name });
 
-    if (universityError || !universityData) throw new Error(universityError?.message || 'Failed to get/create university');
+    if (universityError || !universityData) return ({ error:universityError?.message || 'Failed to get/create university'});
 
     const university_id = universityData;
 
@@ -125,7 +125,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
         p_university_id: university_id,
       });
 
-    if (collegeError || !collegeData) throw new Error(collegeError?.message || 'Failed to get/create college');
+    if (collegeError || !collegeData) return ({ error:collegeError?.message || 'Failed to get/create college'});
 
     const college_id = collegeData;
 
@@ -136,7 +136,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
         p_college_id: college_id,
       });
 
-    if (courseError || !courseData) throw new Error(courseError?.message || 'Failed to get/create course');
+    if (courseError || !courseData)return ({error: courseError?.message || 'Failed to get/create course'});
 
     const course_id = courseData;
 
@@ -147,7 +147,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
         p_course_id: course_id,
       });
 
-    if (branchError || !branch_id) throw new Error(branchError?.message || 'Failed to get/create branch');
+    if (branchError || !branch_id) return ({ error: branchError?.message || 'Failed to get/create branch'});
 
      const { data:branch_year_semesters_id, error: error } = await supabase
       .rpc('find_or_create_branch_year_semester', {
@@ -156,7 +156,7 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
         p_semester_id: semester_id,
       });
 
-    if (error || !branch_year_semesters_id) throw new Error(error?.message || 'Failed to add year/semester to branch');
+    if (error || !branch_year_semesters_id) return ({ error:error?.message || 'Failed to add year/semester to branch'});
     
     return {
       university_id,
@@ -166,7 +166,6 @@ export const postUniversityOrCollegeOrCourseEtc = async (payload: {
       branch_year_semesters_id
     };
   } catch (err: any) {
-    console.error('Error in post university or college or course etc:', err.message);
     return { error: err.message };
   }
 };

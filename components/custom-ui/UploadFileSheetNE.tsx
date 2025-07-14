@@ -54,7 +54,10 @@ const UploadFileSheetNE = ({ userId ,handleCloseActionSheetNE}: { userId: string
         year_id: data.year,
         semester_id: data.semester,
       })
-
+      if(res.error){
+        Alert.alert(res.error)
+        return  ;
+      }
       const res2 = await uploadFileServer({
         fileBuffer: fileBufferRef.current,
         path: filesData?.fileNote?.path
