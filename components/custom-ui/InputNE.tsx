@@ -51,7 +51,7 @@ export default function InputNE({
       <FormControl
         isInvalid={!!error}
         size={size}
-        isDisabled={false}
+        isDisabled={disabled}
         isReadOnly={false}
         isRequired={false}
         
@@ -61,7 +61,7 @@ export default function InputNE({
             {title} {isRequired && <Text className="text-red-700">*</Text>}
           </FormControlLabelText>
         </FormControlLabel>
-        <Input variant="outline" size={size} isDisabled={disabled}>
+        <Input variant="outline" size={size} >
           {prefixIcon && <InputSlot className="ps-2">
             <Pressable >
               {

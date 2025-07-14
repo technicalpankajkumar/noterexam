@@ -42,8 +42,12 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleNavigate=()=>{
+     router.push("/profile")
+  }
+
   const menuItems = [
-    { id: 1, title: 'Edit Profile', icon: Edit, onPress: () => console.log('Edit Profile') },
+    { id: 1, title: 'Edit Profile', icon: Edit, onPress: () => handleNavigate()},
     { id: 2, title: 'Settings', icon: Settings, onPress: () => console.log('Settings') },
     { id: 3, title: 'Notifications', icon: Bell, onPress: () => console.log('Notifications') },
     { id: 4, title: 'Privacy & Security', icon: Shield, onPress: () => console.log('Privacy') },
@@ -83,14 +87,14 @@ export default function ProfileScreen() {
           <Text className="text-sm text-gray-600 mb-6">{user?.email || 'user@email.com'}</Text>
         </View>
 
-        <View className="flex-row bg-white py-5 mb-1">
+        {/* <View className="flex-row bg-white py-5 mb-1">
           {stats.map((stat, index) => (
             <View key={index} className="flex-1 items-center">
               <Text className="text-xl font-bold text-gray-800 mb-1">{stat.value}</Text>
               <Text className="text-sm text-gray-600">{stat.label}</Text>
             </View>
           ))}
-        </View>
+        </View> */}
 
         <View className="bg-white mb-5">
           {menuItems.map((item) => (

@@ -1,6 +1,7 @@
 import { supabase } from '@lib/supabase';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
 export interface Profile {
   id: string;
@@ -12,7 +13,8 @@ export interface Profile {
   branch?: string;
   college?: string;
   university?: string;
-  course_year?: string;
+  year?: string;
+  semester?: string;
 }
 
 interface AuthContextType {
@@ -28,7 +30,7 @@ interface AuthContextType {
   updateProfile: (profile: Partial<Profile>) => Promise<boolean>;
   resetPasswordWithEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
-  verifyEmail: (email: string) => Promise<{ success: boolean; error?: string ,msg?:string}>;
+  verifyEmail: (email: string) => Promise<{ success: boolean; error?: string, msg?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,10 +61,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        id,
+        name,
+        email,
+        mobile,
+        profile_image,
+        university_id,
+        college_id,
+        course_id,
+        branch_year_semesters_id,
+        branch_year_semesters (
+          id,
+          branch_id,
+          year_id,
+          semester_id,
+          branches (
+            id,
+            name
+          ),
+          years (
+            id,
+            name
+          ),
+          semesters (
+            id,
+            name
+          )
+        )
+      `)
       .eq('id', userId)
       .single();
     if (data) {
+      // const { data: branch_year_semester_id, error: branchYearSemesterError } = await supabase
+      //   .from('branch_year_semesters')
+      //   .select('*')
+      //   .eq('id', data.branch_year_semesters_id)
+      //   .single();
+
       setUser(data);
       await SecureStore.setItemAsync('user', JSON.stringify(data));
     } else {
@@ -75,9 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with email and password
   const loginWithEmailPassword = async (email: string, password: string) => {
-    let lowercaseEmail=email.toLowerCase();
+    let lowercaseEmail = email.toLowerCase();
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email:lowercaseEmail, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: lowercaseEmail, password });
 
     if (error || !data.user) {
       setLoading(false);
@@ -134,8 +170,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     mobile: string;
   }) => {
     setLoading(true);
-    let lowercaseEmail=email.toLowerCase();
-    const { data, error } = await supabase.auth.signUp({ email:lowercaseEmail, password });
+    let lowercaseEmail = email.toLowerCase();
+    const { data, error } = await supabase.auth.signUp({ email: lowercaseEmail, password });
     if (error || !data.user) {
       setLoading(false);
       return { success: false, error: error?.message || 'Signup failed' };
@@ -181,14 +217,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Update profile
-  const updateProfile = async (profile: Partial<Profile>): Promise<boolean> => {
+  const updateProfile = async (profileData: Partial<Profile>): Promise<boolean> => {
     try {
       if (!user) return false;
-      const { error } = await supabase
+      const { data: branch_year_semesters_id, error: error } = await supabase
+        .rpc('find_or_create_branch_year_semester', {
+          p_branch_id: profileData?.branch,
+          p_year_id: profileData?.year,
+          p_semester_id: profileData?.semester,
+        });
+
+      if (error || !branch_year_semesters_id) throw new Error(error?.message || 'Failed to add year/semester to branch');
+
+      const { error: updateError } = await supabase
         .from('profiles')
-        .update(profile)
-        .eq('id', user.id);
-      if (error) throw error;
+        .update({
+          name: profileData?.name,
+          email: profileData?.email,
+          mobile: profileData?.mobile,
+          university_id: profileData?.university,
+          college_id: profileData?.college,
+          course_id: profileData?.course,
+          branch_year_semesters_id,
+        })
+        .eq('id', user?.id);
+      if (updateError) Alert.alert(updateError.message)
+      else alert('Profile updated')
       await fetchProfile(user.id);
       return true;
     } catch (error) {
@@ -214,22 +268,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   };
 
-const verifyEmail = async (email: string): Promise<{ success: boolean; error?: string ,msg?:string}> => {
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
-    email,
-    options: {
-      emailRedirectTo: 'https://your-app.com/verify',
-    },
-  });
+  const verifyEmail = async (email: string): Promise<{ success: boolean; error?: string, msg?: string }> => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: 'https://your-app.com/verify',
+      },
+    });
 
-  if (error) {
-    return { success: false, error: error.message };
-  }
-  // Optionally, you can show an alert here if you want
-  // alert('Verification email resent.');
-  return { success: true,msg:"Verification email resent." };
-};
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    // Optionally, you can show an alert here if you want
+    // alert('Verification email resent.');
+    return { success: true, msg: "Verification email resent." };
+  };
 
   // Provide all functions and user data globally
   const value: AuthContextType = {
