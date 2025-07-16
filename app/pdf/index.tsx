@@ -258,6 +258,7 @@ export default function index() {
                       value={value}
                       onChangeText={onChange}
                       title={capitalizeFirstLetter(field)}
+                      isRequired
                       error={typeof error?.message === 'string' ? error.message : undefined}
                     />
                   ) : (
@@ -270,6 +271,7 @@ export default function index() {
                         listApiCall(field, e);
                         onChange(e);
                       }}
+                      isRequired
                       value={returnFieldWiseList(field)?.filter((item) => item.value === value)[0]?.label || ''} // Ensure value is set correctly
                     />
                   )
@@ -301,7 +303,10 @@ export default function index() {
                   }
                   }
                 >
-                  <Text className="text-sm font-medium ">Choose Notes</Text>
+                  <View className='flex flex-row gap-1'>
+                    <Text className="text-base font-medium ">Choose Notes</Text>
+                  <Text className="text-red-700">*</Text>
+                  </View>
                   <View className="my-2 items-center justify-center rounded-xl bg-background-50 border border-dashed border-outline-300 h-[60px] w-full">
                     <UploadCloud className="h-[50px] w-[50px] stroke-background-200" />
                     {bufferLoading ? <ActivityIndicator size="small" color="#4A90E2" /> : <Text className="text-sm">
@@ -334,7 +339,10 @@ export default function index() {
                   }
                   className=""
                 >
-                  <Text className="text-sm font-medium ">Choose Thumbnail</Text>
+                  <View className='flex flex-row gap-1'>
+                    <Text className="text-base font-medium ">Choose Thumbnail</Text>
+                  <Text className="text-red-700">*</Text>
+                  </View>
                   <View className="my-2 items-center justify-center rounded-xl bg-background-50 border border-dashed border-outline-300 h-[60px] w-full">
                     <UploadCloud className="h-[50px] w-[50px] stroke-background-200" />
                     <Text className="text-sm">

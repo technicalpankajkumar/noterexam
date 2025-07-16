@@ -1,12 +1,13 @@
 import ButtonNE from "@components/custom-ui/ButtonNE";
 import InputNE from "@components/custom-ui/InputNE";
 import SelectNE from "@components/custom-ui/SelectNE";
+import { Header } from "@components/layout-partials/Header";
 import { useAuth } from "@contexts/AuthContext";
 import { useIsFocused } from "@react-navigation/native";
 import { Camera } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { getBranches, getColleges, getCourses, getSemesters, getUniversity, getYears } from "../../utils/getSupabaseApi";
 
 
@@ -122,9 +123,10 @@ const ProfileScreen = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-2 bg-white border-b border-gray-200">
+      {/* <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-2 bg-white border-b border-gray-200">
         <Text className="text-2xl font-bold text-gray-800 mt-1">Edit Profile</Text>
-      </View>
+      </View> */}
+      <Header backButton />
       <ScrollView className="flex-1 mt-14" showsVerticalScrollIndicator={false}>
         <View className="bg-white py-4 items-center mb-1">
           <View className="relative mb-1">

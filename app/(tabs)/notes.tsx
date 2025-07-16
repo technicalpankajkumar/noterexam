@@ -3,7 +3,7 @@ import { Header } from '@components/layout-partials/Header';
 import { useAuth } from '@contexts/AuthContext';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FileText } from 'lucide-react-native';
+import { FileText, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -32,13 +32,13 @@ const numColumns = isTablet ? 4 : 2;
 export default function NotesScreen() {
   const { user } = useAuth();
   const params = useLocalSearchParams();
+  const isFocused = useIsFocused();
   const localSearchEnable = params?.searchEnable;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState(user?.branch_year_semesters?.year_id);
   const [selectedSemester, setSelectedSemester] = useState(user?.branch_year_semesters?.semester_id);
   const [notes, setNotes] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [semesterData, setSemesterData] = useState<any[]>([]);
   const [yearData, setYearData] = useState<any[]>([]);
@@ -80,6 +80,18 @@ export default function NotesScreen() {
   useEffect(() => {
     fetchData();
   }, [clientParams])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setClientParams((prev) => ({
+      ...prev,
+      searchTerm: searchQuery,
+      page: 1,
+    }));
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -134,6 +146,8 @@ export default function NotesScreen() {
             placeholder='Search notes....'
             value={searchQuery}
             onChangeText={setSearchQuery}
+            postfixIcon={!!searchQuery}
+            postfixIconName={<X color={'gray'} onPress={()=>setSearchQuery('')}/>}
           />
         </View>
       </View>}
@@ -142,7 +156,7 @@ export default function NotesScreen() {
           {[{ label: "All", value: '' }, ...yearData].map((item) => (
             <TouchableOpacity
               key={item.value}
-              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedYear === item.value ? 'bg-blue-400' : 'bg-gray-200'}`}
+              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedYear === item.value ? 'bg-blue-800' : 'bg-gray-200'}`}
               onPress={() => handleFilter(item.value, 'year')}
             >
               <Text className={`text-sm font-medium text-center ${selectedYear === item.value ? 'text-white' : 'text-gray-800'}`} numberOfLines={1}>{item.label}</Text>
@@ -153,7 +167,7 @@ export default function NotesScreen() {
           {[{ label: "All", value: '' }, ...semesterData].map((item) => (
             <TouchableOpacity
               key={item.value}
-              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedSemester === item.value ? 'bg-blue-400' : 'bg-gray-200'}`}
+              className={`px-4 text-sm font-semibold rounded-xl p-1 items-center mr-4 shadow-sm ${selectedSemester === item.value ? 'bg-blue-800' : 'bg-gray-200'}`}
               onPress={() => handleFilter(item.value, 'semester')}
             >
               <Text className={`text-sm font-medium text-center ${selectedSemester === item.value ? 'text-white' : 'text-gray-800'}`} numberOfLines={1}>{item.label}</Text>

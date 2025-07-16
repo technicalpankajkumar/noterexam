@@ -110,7 +110,7 @@ export default function HomeScreen() {
       case 'recentBooks':
         return (
           <View className="px-3 mb-4">
-            <Text className="text-xl font-bold text-gray-800 mb-4 bg-white px-2 py-1 shadow-sm rounded-sm">Recent Books</Text>
+            <Text className="text-base md:text-lg font-bold text-white mb-2 bg-blue-800 px-2 py-1 shadow-sm rounded-md">Recent Books</Text>
             {loading ? (
               <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
             ) : (
@@ -121,14 +121,14 @@ export default function HomeScreen() {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    className="w-36 bg-white rounded-xl p-2 items-center mr-4 shadow-sm "
+                    className="w-32 bg-white rounded-xl p-2 items-center mr-4 shadow-sm "
                     onPress={() => handleViewPDF(item.document_url, item.title)}
                   >
                     <Image
                       source={{ uri: item.thumbnail_url ?? "https://fastly.picsum.photos/id/4/5000/3333.jpg?hmac=ghf06FdmgiD0-G4c9DdNM8RnBIN7BO0-ZGEw47khHP4" }}
-                      className="w-32 h-28 rounded-lg mb-2"
+                      className="w-28 h-32 rounded-lg mb-2"
                     />
-                    <Text className="text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={2}>{item.title}</Text>
+                    <Text className="text-xs md:text-sm font-medium text-center text-gray-800 mb-1" numberOfLines={2}>{item.title}</Text>
                   </TouchableOpacity>
                 )}
                 ListEmptyComponent={
@@ -144,7 +144,7 @@ export default function HomeScreen() {
       case 'courseRelated':
         return (
           <View className="px-3 max-h-96 mb-4">
-            <Text className="text-xl font-bold text-gray-800 mb-4 bg-white px-2 py-1 shadow-sm rounded-sm">Related To Course</Text>
+            <Text className="text-base md:text-lg font-bold text-white mb-2 bg-blue-800 px-2 py-1 shadow-sm rounded-md">Related To Course</Text>
             {courseLoading ? (
               <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
             ) : (
@@ -155,32 +155,56 @@ export default function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.id}
                 columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between', flexDirection: 'row' } : undefined}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={{
-                      width: (windowWidth - 32 - (numColumns - 1) * 12) / numColumns,
-                      marginBottom: 12,
+               renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row', // image left, text right
+                    alignItems: 'flex-start',
+                    marginBottom: 12,
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    padding: 8,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.05,
+                    shadowRadius: 2,
+                    elevation: 1,
+                    width: (windowWidth - 32 - (numColumns - 1) * 12) / numColumns,
+                  }}
+                  onPress={() => handleViewPDF(item.document_url, item.title)}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={{
+                      uri:
+                        item.thumbnail_url ??
+                        'https://fastly.picsum.photos/id/4/5000/3333.jpg?hmac=ghf06FdmgiD0-G4c9DdNM8RnBIN7BO0-ZGEw47khHP4',
                     }}
-                    className="bg-white rounded-xl p-2 shadow-sm flex-row gap-2"
-                    onPress={() => handleViewPDF(item.document_url, item.title)}
-                  >
-                    <Image
-                      source={{
-                        uri: item.thumbnail_url ??
-                          'https://fastly.picsum.photos/id/4/5000/3333.jpg?hmac=ghf06FdmgiD0-G4c9DdNM8RnBIN7BO0-ZGEw47khHP4',
-                      }}
-                      className="size-14 rounded-lg mb-2"
-                      resizeMode="cover"
-                    />
-                    <Text className="text-xs font-medium text-center text-gray-800 mb-1 px-2" numberOfLines={4}>
+                    style={{
+                      width: 54,
+                      height: 60,
+                      borderRadius: 8,
+                      marginRight: 6,
+                      backgroundColor: '#f3f4f6',
+                      borderColor: "gray",
+                      borderWidth: 1
+                    }}
+                    resizeMode="cover"
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      className="text-xs font-medium text-gray-800"
+                      numberOfLines={4}
+                      ellipsizeMode="tail"
+                    >
                       {item.title}
                     </Text>
-                  </TouchableOpacity>
-                )}
+                  </View>
+                </TouchableOpacity>
+              )}
                 ListEmptyComponent={
                   <View className="flex flex-col items-center justify-evenly max-h-[100px] bg-white rounded-xl shadow-sm p-4">
                     <FileText size={30} color={'#9ca3af'} />
-                    <Text className="text-sm text-gray-400 mb-1">No Related Notes Available</Text>
+                    <Text className="text-sm text-gray-400 mt-2">No Related Notes Available</Text>
                   </View>
                 }
               />)
@@ -190,7 +214,7 @@ export default function HomeScreen() {
       case 'previousPapers':
         return (
           <View className="px-3 max-h-96 mb-4">
-            <Text className="text-xl font-bold text-gray-800 mb-4 bg-white px-2 py-1 shadow-sm rounded-sm">
+            <Text className="text-base md:text-lg font-bold text-white mb-2 bg-blue-800 px-2 py-1 shadow-sm rounded-md">
               Previous Exam Paper's
             </Text>
             {examLoading ? (
@@ -288,7 +312,7 @@ export default function HomeScreen() {
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-500 justify-center items-center shadow-lg" onPress={() => router.push('/pdf')}>
+      <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-800 justify-center items-center shadow-lg" onPress={() => router.push('/pdf')}>
         <Plus size={24} color="white" />
       </TouchableOpacity>
     </View>
