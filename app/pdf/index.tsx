@@ -3,9 +3,10 @@ import CheckBoxNE from '@components/custom-ui/CheckBoxNE';
 import InputNE from '@components/custom-ui/InputNE';
 import SelectNE from '@components/custom-ui/SelectNE';
 import TextAreaNE from '@components/custom-ui/TextAreaNE';
+import { Header } from '@components/layout-partials/Header';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { AlertCircleIcon, Bell, NotebookPen, Search, UploadCloud } from 'lucide-react-native';
+import { AlertCircleIcon, UploadCloud } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Alert, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
@@ -146,7 +147,9 @@ export default function index() {
   const notesTypeList = [
     { label: 'Book', value: 'book' },
     { label: 'Model/Quantum Paper', value: 'quantum' },
-    { label: 'Notes', value: 'notes' }
+    { label: 'Notes', value: 'notes' },
+    { label: 'Previous Paper', value: 'prev_paper' },
+    { label: 'Modal Paper', value: 'modal_paper' }
   ]
 
   const fields = ['university', 'college', 'course', 'branch', 'year', 'semester'];
@@ -186,20 +189,7 @@ export default function index() {
     <View className="flex-1 bg-white px-6">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       {/* Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-1 bg-white border-b border-gray-200">
-        <View className='flex-row items-center gap-1'>
-          <NotebookPen size={20} color={'#1e40af'} fontWeight={'bold'} />
-          <Text className="text-2xl font-bold text-blue-800">{'Noter Exam'}</Text>
-        </View>
-        <View className="flex-row space-x-3">
-          <TouchableOpacity className="p-2">
-            <Search size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity className="p-2">
-            <Bell size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <Header backButton={true}/>
       {/* Body */}
       <View className="mt-16">
         <ScrollView showsVerticalScrollIndicator={false}>

@@ -1,7 +1,8 @@
+import { Header } from '@components/layout-partials/Header';
 import { useAuth } from '@contexts/AuthContext';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Bell, FileText, NotebookPen, Plus, Search } from 'lucide-react-native';
+import { FileText, Plus } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -26,7 +27,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [bookData, setBookData] = useState<any[]>([]);
   const [courseRelatedData, setCourseRelatedData] = useState<any[]>([]);
-
+  const [examPaperData, setExamPaperData] = useState<any[]>([]);
   const quickActions = [
     { id: 1, title: 'Upload Notes', icon: '📝', color: 'bg-blue-500' },
     { id: 2, title: 'Join Community', icon: '👥', color: 'bg-green-500' },
@@ -74,11 +75,32 @@ export default function HomeScreen() {
     }
   };
 
+  const fetchExamPapers = async () => {
+    setRefreshing(true);
+    try {
+      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "prev_paper", course_id: user?.course_id } });
+      if (res.success) {
+        setExamPaperData(res.data);
+      } else {
+        Alert.alert('Fetch failed', res.error);
+      }
+    } catch (error) {
+      Alert.alert("Error fetching data:", error?.toString() || "Something went wrong");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetch();
     fetchCourseRelated();
+    fetchExamPapers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const searchControl = () => {
+    router.push({ pathname: '/(tabs)/notes', params: { searchEnable: true } });
+  }
 
   const windowWidth = Dimensions.get('window').width;
   const isTablet = windowWidth >= 768;
@@ -174,7 +196,7 @@ export default function HomeScreen() {
           <View className="px-3 max-h-96 mb-4">
             <Text className="text-xl font-bold text-gray-800 mb-4 bg-white px-2 py-1 shadow-sm rounded-sm">Previous Exam Paper's</Text>
             <FlatList
-              data={courseRelatedData}
+              data={examPaperData}
               numColumns={numColumns}
               key={numColumns + '-papers'}
               showsHorizontalScrollIndicator={false}
@@ -220,21 +242,7 @@ export default function HomeScreen() {
     <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       {/* Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-1 bg-white border-b border-gray-200">
-        <View className='flex-row items-center gap-1'>
-          <NotebookPen size={20} color={'#1e40af'} fontWeight={'bold'} />
-          <Text className="text-2xl font-bold text-blue-800">{'Noter Exam'}</Text>
-        </View>
-        <View className="flex-row space-x-3">
-          <TouchableOpacity className="p-2">
-            <Search size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity className="p-2">
-            <Bell size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
+      <Header searchControl={searchControl}/>
       {/* Main FlatList for sections */}
       <FlatList
         data={sections}

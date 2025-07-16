@@ -272,7 +272,7 @@ type FetchDocumentsParams = {
     branch_id?: string;
     year_number?: number;
     semester_number?: number;
-    type?: 'book' | 'notes' | 'quantum'; // from your enum
+    type?: 'book' | 'notes' | 'quantum' | 'prev_paper' | 'modal_paper'; // from your enum
   };
 };
 

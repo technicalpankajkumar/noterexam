@@ -1,10 +1,9 @@
-import InputNE from '@components/custom-ui/InputNE';
+import { Header } from '@components/layout-partials/Header';
 import {
-  Bell,
   Heart,
   MessageCircle,
   MoreHorizontal,
-  Share,
+  Share
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -68,27 +67,8 @@ export default function CommunityScreen() {
   return (
     <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
       {/* Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-2 bg-white border-b border-gray-200">
-        <Text className="text-2xl font-bold text-gray-800 mt-1">Community</Text>
-        <View className="flex-row space-x-3">
-          <TouchableOpacity className="p-2">
-            <Bell size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Search Bar */}
-      <View className="px-5 pt-12 bg-white">
-        <InputNE
-          size="lg"
-          searchBox
-          placeholder="Search notes...."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+      <Header/>
 
       {/* Categories */}
       <View className="bg-white pb-4">

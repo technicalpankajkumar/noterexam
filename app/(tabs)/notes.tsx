@@ -1,11 +1,13 @@
 import InputNE from '@components/custom-ui/InputNE';
+import { Header } from '@components/layout-partials/Header';
 import { useIsFocused } from '@react-navigation/native';
-import { router } from 'expo-router';
-import { Bell, FileText } from 'lucide-react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { FileText } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -21,6 +23,8 @@ interface PdfFile {
   created_at: string;
 }
 export default function NotesScreen() {
+  const params = useLocalSearchParams();
+  const localSearchEnable = params?.searchEnable;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [notes, setNotes] = useState<PdfFile[]>([]);
@@ -29,6 +33,7 @@ export default function NotesScreen() {
   const [loading, setLoading] = useState(false);
   const [semesterData, setSemesterData] = useState<any[]>([]);
   const [yearData, setYearData] = useState<any[]>([]);
+  const [searchEnable,setSearchEnable] = useState(!!localSearchEnable);
 
    const fetchSemester = async ()=>{
       const data = await getSemesters(null);
@@ -47,9 +52,11 @@ export default function NotesScreen() {
   };
   useEffect(() => {
     fetchData();
-    fetchSemester();
-    fetchYear();
-  }, []);
+    if(yearData?.length == 0 || semesterData?.length == 0){
+      fetchSemester();
+      fetchYear();
+    }
+  }, [isFocused]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -67,26 +74,34 @@ export default function NotesScreen() {
   return (
     <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      {/* Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between items-center px-2 pt-2 pb-2 bg-white border-b border-gray-200">
-        <Text className="text-2xl font-bold text-gray-800 mt-1">Notes</Text>
-        <View className="flex-row space-x-3">
-          <TouchableOpacity className="p-2">
-            <Bell size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header searchControl={()=>setSearchEnable(pre=>!pre)}/>
       {/* Search Bar */}
-      <View className="px-5 pt-12  bg-white">
+      {/* Outside click overlay for search bar */}
+      {searchEnable && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9,
+          }}
+          onPress={() => setSearchEnable(false)}
+        />
+      )}
+     { searchEnable && <View className="px-2 absolute top-12 left-0 right-0 z-10">
+        <View className='bg-white shadow-lg rounded-md border border-gray-200 px-2 py-1 shadow-black'>
         <InputNE
-          size='md'
+          size='lg'
           prefixIcon
           placeholder='Search notes....'
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
       </View>
-      <View className="px-3 pt-2 bg-white">
+      </View>}
+      <View className="px-3 pt-2 bg-white mt-14">
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
           {[{label:"All",value:''},...yearData].map((item) => (
             <TouchableOpacity
