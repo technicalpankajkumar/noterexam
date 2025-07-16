@@ -33,7 +33,7 @@ export default function NotesScreen() {
   const [loading, setLoading] = useState(false);
   const [semesterData, setSemesterData] = useState<any[]>([]);
   const [yearData, setYearData] = useState<any[]>([]);
-  const [searchEnable,setSearchEnable] = useState(!!localSearchEnable);
+  const [searchEnable,setSearchEnable] = useState(false);
 
    const fetchSemester = async ()=>{
       const data = await getSemesters(null);
@@ -52,6 +52,7 @@ export default function NotesScreen() {
   };
   useEffect(() => {
     fetchData();
+    setSearchEnable(!!localSearchEnable)
     if(yearData?.length == 0 || semesterData?.length == 0){
       fetchSemester();
       fetchYear();
