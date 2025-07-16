@@ -37,7 +37,7 @@ export default function HomeScreen() {
   const fetch = async () => {
     setLoading(true);
     try {
-      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book" } });
+      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type : 'book'} });
       if (res.success) {
         setBookData(res.data);
       } else {
@@ -91,7 +91,7 @@ export default function HomeScreen() {
   }, [isFocused]);
 
   const searchControl = () => {
-    router.push({ pathname: '/(tabs)/notes', params: { searchEnable: true } });
+    router.push({ pathname: '/(tabs)/notes', params: { searchEnable: 1 } });
   }
 
   const windowWidth = Dimensions.get('window').width;

@@ -270,11 +270,72 @@ type FetchDocumentsParams = {
     college_id?: string;
     course_id?: string;
     branch_id?: string;
+    year_id?: string;
+    semester_id?: string;
     year_number?: number;
     semester_number?: number;
     type?: 'book' | 'notes' | 'quantum' | 'prev_paper' | 'modal_paper'; // from your enum
   };
 };
+
+// export const getBooksDetails = async ({
+//   page = 1,
+//   limit = 10,
+//   searchTerm = '',
+//   filters = {},
+// }: FetchDocumentsParams) => {
+//   try {
+//     const offset = (page - 1) * limit;
+
+//     let query = supabase
+//       .from('doc_details')
+//       .select()
+//       .order('created_at', { ascending: false })
+//       .range(offset, offset + limit - 1);
+
+//     // Apply search
+//     if (searchTerm) {
+//       query = query.ilike('title', `%${searchTerm}%`);
+//     }
+
+//     // Apply filters
+//     const {
+//       university_id,
+//       college_id,
+//       course_id,
+//       branch_id,
+//       type,
+//     } = filters;
+
+//     if (university_id) query = query.eq('university_id', university_id);
+//     if (college_id) query = query.eq('college_id', college_id);
+//     if (course_id) query = query.eq('course_id', course_id);
+//     if (branch_id) query = query.eq('branch_id', branch_id);
+//     if (type) query = query.eq('type', type);
+
+//     // Join to year/semester tables if needed in future using RPC
+
+//     const { data, error, count } = await query;
+
+//     if (error) {
+//       console.error('Fetch error:', error.message);
+//       return { success: false, error: error.message };
+//     }
+
+//     return {
+//       success: true,
+//       data,
+//       count,
+//       page,
+//       totalPages: Math.ceil((count || 0) / limit),
+//     };
+//   } catch (err: any) {
+//     return {
+//       success: false,
+//       error: err?.message || 'Unexpected fetch error',
+//     };
+//   }
+// };
 
 export const getBooksDetails = async ({
   page = 1,
@@ -285,47 +346,42 @@ export const getBooksDetails = async ({
   try {
     const offset = (page - 1) * limit;
 
-    let query = supabase
-      .from('doc_details')
-      .select()
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // Apply search
-    if (searchTerm) {
-      query = query.ilike('title', `%${searchTerm}%`);
-    }
-
-    // Apply filters
     const {
       university_id,
       college_id,
       course_id,
       branch_id,
+      year_id,
+      semester_id,
       type,
     } = filters;
 
-    if (university_id) query = query.eq('university_id', university_id);
-    if (college_id) query = query.eq('college_id', college_id);
-    if (course_id) query = query.eq('course_id', course_id);
-    if (branch_id) query = query.eq('branch_id', branch_id);
-    if (type) query = query.eq('type', type);
-
-    // Join to year/semester tables if needed in future using RPC
-
-    const { data, error, count } = await query;
+    const { data, error } = await supabase.rpc('fetch_doc_details_with_names', {
+      p_university_id: university_id || null,
+      p_college_id: college_id || null,
+      p_course_id: course_id || null,
+      p_branch_id: branch_id || null,
+      p_year_id: year_id || null,
+      p_semester_id: semester_id || null,
+      p_type: type || null,
+      p_search_term: searchTerm || null,
+      p_limit: limit,
+      p_offset: offset,
+    });
 
     if (error) {
-      console.error('Fetch error:', error.message);
+      console.error('Supabase fetch error:', error);
       return { success: false, error: error.message };
     }
+
+    const total = data?.[0]?.total_count || 0;
 
     return {
       success: true,
       data,
-      count,
+      count: total,
       page,
-      totalPages: Math.ceil((count || 0) / limit),
+      totalPages: Math.ceil(total / limit),
     };
   } catch (err: any) {
     return {
@@ -334,6 +390,7 @@ export const getBooksDetails = async ({
     };
   }
 };
+
 
 export const getThumbnailUrl = (path:string) => {
   return supabase
