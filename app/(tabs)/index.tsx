@@ -31,7 +31,9 @@ export default function HomeScreen() {
   const [examPaperData, setExamPaperData] = useState<any[]>([]);
 
   const handleViewPDF = (uri: string, title: string) => {
+    // router.push({ pathname: '/pdf/[id]', params: { id: uri?.split("/")?.[2], uri, title } });
     router.push({ pathname: `/pdf/${uri?.split("/")?.[2]}`, params: { uri, title } });
+
   };
 
   const fetch = async () => {

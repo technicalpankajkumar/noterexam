@@ -8,6 +8,7 @@
     "scheme": "noterexam",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "jsc",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.noterexam"
@@ -52,6 +53,7 @@
       "eas": {
         "projectId": "efc16615-73e2-4248-ba08-c6682b16cec9"
       }
-    }
+    },
+    "owner": "noterexam"
   }
 }
