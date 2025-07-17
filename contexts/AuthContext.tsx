@@ -112,17 +112,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with email and password
   const loginWithEmailPassword = async (email: string, password: string) => {
-    let lowercaseEmail = email.toLowerCase();
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email: lowercaseEmail, password });
+    try{
+      let lowercaseEmail = email.toLowerCase();
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({ email: lowercaseEmail, password });
 
-    if (error || !data.user) {
+      if (error || !data.user) {
+        setLoading(false);
+        Alert.alert('Error!', error?.message || "Login Failed!")
+        return { success: false};
+      }
+      await fetchProfile(data.user.id);
       setLoading(false);
-      return { success: false, error: error?.message || 'Login failed' };
+      return { success: true };
+    }catch(err){
+       Alert.alert('Network request error!')
     }
-    await fetchProfile(data.user.id);
-    setLoading(false);
-    return { success: true };
   };
 
   // Login with mobile and password

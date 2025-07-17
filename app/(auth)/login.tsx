@@ -4,7 +4,6 @@ import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -53,8 +52,6 @@ export default function LoginScreen() {
 
     if (success) {
       router.replace('/(tabs)');
-    } else {
-      Alert.alert('Error', 'Invalid credentials');
     }
   };
 
