@@ -20,7 +20,7 @@ export default function ButtonNE({
     return (<ButtonGroup className='mb-6'>
         <Button
         size="lg"
-            className={`bg-[#4A90E2] ${className}`}
+            className={`bg-blue-800 ${className}`}
             onPress={onPress}
             disabled={disabled || loading}
             style={({ pressed }: { pressed: boolean }) => ({
@@ -30,7 +30,7 @@ export default function ButtonNE({
                 elevation: 0, // removes Android shadow
                 transform: [{ scale: pressed ? 0.99 : 1 }],
             })}
-            android_ripple={{ color: '#4A90E2', borderless: false }}
+            android_ripple={{ color: '#1d4ed8', borderless: false }}
         >
             <ButtonText style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
                 {loading ? <ButtonSpinner animating={loading} /> : title}

@@ -36,7 +36,7 @@ export default function InputNE({
   placeholder,
   onChangeText,
   keyboardType = 'default',
-  size = "md",
+  size = "lg",
   prefixIcon = false,
   prefixIconName,
   postfixIcon = false,

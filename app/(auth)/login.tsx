@@ -2,6 +2,7 @@ import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { NotebookPen } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -63,11 +64,12 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
 
-          <View className="flex-1 px-6 pt-32 justify-center "> 
-            <Text className="text-[30px] font-bold text-[#333] mb-2 text-center">Welcome Back</Text>
-            <Text className="text-base text-[#666] mb-8 text-center">
-              NoterExam
-            </Text>
+          <View className="flex-1 px-6 pt-32  justify-center "> 
+            <Text className="text-4xl font-bold text-[#333] mb-2 text-center">Welcome</Text>
+            <View className='flex-row items-center gap-1 justify-center py-2'>
+              <NotebookPen size={20} color={'#1e40af'} fontWeight={'bold'} />
+              <Text className="text-base font-bold text-blue-800">{'Noter Exam'}</Text>
+            </View>
 
             <View className="flex-1">
               <InputNE
@@ -100,7 +102,7 @@ export default function LoginScreen() {
 
               <View className="flex-row justify-end items-center mb-3">
                 <TouchableOpacity>
-                  <Text className="text-base text-[#4A90E2] font-medium">Forgot password</Text>
+                  <Text className="text-base text-blue-800 font-medium">Forgot password</Text>
                 </TouchableOpacity>
               </View>
               <ButtonNE 
@@ -111,7 +113,7 @@ export default function LoginScreen() {
               <View className="flex-row justify-center items-center">
                 <Text className="text-[#666] text-base">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                  <Text className="text-[#4A90E2] text-base font-medium">Sign up</Text>
+                  <Text className="text-blue-800 text-base font-medium">Sign up</Text>
                 </TouchableOpacity>
               </View>
             </View>
