@@ -15,6 +15,7 @@ export interface Profile {
   university?: string;
   year?: string;
   semester?: string;
+  type:'student' | 'admin' | 'coordinator'
 }
 
 interface AuthContextType {
@@ -99,7 +100,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       //   .select('*')
       //   .eq('id', data.branch_year_semesters_id)
       //   .single();
-
       setUser(data);
       await SecureStore.setItemAsync('user', JSON.stringify(data));
     } else {

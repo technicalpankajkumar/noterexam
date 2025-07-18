@@ -106,6 +106,7 @@ export default function HomeScreen() {
     { key: 'courseRelated' },
     { key: 'previousPapers' },
   ];
+  console.log(user)
 
   const renderSection = ({ item }: { item: { key: string } }) => {
     switch (item.key) {
@@ -314,9 +315,9 @@ export default function HomeScreen() {
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-800 justify-center items-center shadow-lg" onPress={() => router.push('/pdf')}>
+      {(['admin','coordinator'].includes(user?.type) ) && <TouchableOpacity className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-blue-800 justify-center items-center shadow-lg" onPress={() => router.push('/pdf')}>
         <Plus size={24} color="white" />
-      </TouchableOpacity>
+      </TouchableOpacity>}
     </View>
   );
 }
