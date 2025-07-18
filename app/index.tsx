@@ -23,10 +23,10 @@ export default function SplashScreen() {
 
   return (
     <LinearGradient
-      colors={['#4A90E2', '#357ABD']}
+      colors={['#3b82f6', '#2563eb']}
       className={'flex-1'}
     >
-     <View className="flex-1 bg-blue-700 items-center justify-center">
+     <View className="flex-1 bg-gradient-to-tr items-center justify-center">
       {/* Concentric Circles */}
       <View className="absolute w-[500px] h-[500px] rounded-full bg-blue-500 border-2 border-dashed border-blue-600 animate-spin" />
       <View className="absolute w-96 h-96 rounded-full bg-blue-400 opacity-45 border-2 border-dashed border-blue-500 animate-spin" />
