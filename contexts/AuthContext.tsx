@@ -25,11 +25,10 @@ interface AuthContextType {
   loginWithEmailPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginWithMobilePassword: (mobile: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginWithMagicLink: (email: string) => Promise<{ success: boolean; error?: string }>;
-  signupWithEmailPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signupWithEmailMobilePassword: (data: { email: string; password: string; name: string; mobile: string }) => Promise<{ success: boolean; error?: string }>;
+  signupWithEmailPassword: ({email,password}:{email: string, password: string}) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   uploadProfileImage: (fileUri: string) => Promise<string | null>;
-  updateProfile: (profile: Partial<Profile>) => Promise<boolean>;
+  updateProfile: (profile: Partial<Profile>,hit:boolean) => Promise<boolean>;
   resetPasswordWithEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
   verifyEmail: (email: string) => Promise<{ success: boolean; error?: string, msg?: string }>;
@@ -97,11 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .eq('id', userId)
       .single();
     if (data) {
-
       setUser(data);
       await SecureStore.setItemAsync('user', JSON.stringify(data));
     } else {
-      setUser(null);
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser({email:user?.email,id:user?.id,name:''});
       await SecureStore.deleteItemAsync('user');
     }
   };
@@ -120,10 +119,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Alert.alert('Error!', error?.message || "Login Failed!")
         return { success: false};
       }
-       const { error: profileError } = await supabase.from('profiles').insert([
-      { id: data.user.id, email:data.user?.email, name:'pankajkumar', mobile:'9999999999' },
-      ]);
-      console.log({error})
       await fetchProfile(data.user.id);
       setLoading(false);
       return { success: true };
@@ -156,41 +151,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  // Signup with email and password only
-  const signupWithEmailPassword = async (email: string, password: string) => {
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
-    if (error || !data.user) return { success: false, error: error?.message || 'Signup failed' };
-    return { success: true };
-  };
 
   // Signup with email, mobile, password, name
-  const signupWithEmailMobilePassword = async ({
+  const signupWithEmailPassword = async ({
     email,
     password,
-    name,
-    mobile,
   }: {
     email: string;
     password: string;
-    name: string;
-    mobile: string;
   }) => {
     setLoading(true);
     let lowercaseEmail = email.toLowerCase();
-    const { data, error } = await supabase.auth.signUp({ email: lowercaseEmail, password });
+    const { data, error } = await supabase.auth.signUp({ email: lowercaseEmail, password});
+
     if (error || !data.user) {
       setLoading(false);
       return { success: false, error: error?.message || 'Signup failed' };
     }
-    // Insert profile data
-    // const { error: profileError } = await supabase.from('profiles').insert([
-    //   { id: data.user.id, email, name, mobile },
-    // ]);
     setLoading(false);
-    // if (profileError) return { success: false, error: profileError.message };
-    // await fetchProfile(data.user.id);
     return { success: true };
   };
 
@@ -225,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Update profile
-  const updateProfile = async (profileData: Partial<Profile>): Promise<boolean> => {
+  const updateProfile = async (profileData: Partial<Profile>,hit:boolean): Promise<boolean> => {
     try {
       if (!user) return false;
       const { data: branch_year_semesters_id, error: error } = await supabase
@@ -237,8 +215,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error || !branch_year_semesters_id) throw new Error(error?.message || 'Failed to add year/semester to branch');
 
-      const { error: updateError } = await supabase
-        .from('profiles')
+     let action = supabase.from('profiles');
+
+    let response;
+
+    if (!hit) {
+      response = await action
         .update({
           name: profileData?.name,
           email: profileData?.email,
@@ -249,6 +231,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           branch_year_semesters_id,
         })
         .eq('id', user?.id);
+    } else {
+      response = await action
+        .insert({
+          id: user?.id,
+          name: profileData?.name,
+          email: profileData?.email,
+          mobile: profileData?.mobile,
+          university_id: profileData?.university,
+          college_id: profileData?.college,
+          course_id: profileData?.course,
+          branch_year_semesters_id,
+        });
+    }
+
+      const { error: updateError } = response;
       if (updateError) Alert.alert(updateError.message)
       else alert('Profile updated')
       await fetchProfile(user.id);
@@ -301,7 +298,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithMobilePassword,
     loginWithMagicLink,
     signupWithEmailPassword,
-    signupWithEmailMobilePassword,
     logout,
     uploadProfileImage,
     updateProfile,

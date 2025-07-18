@@ -15,17 +15,16 @@ import {
 } from 'react-native';
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
-  const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cnfPassword, setCnfPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [nameError, setNameError] = useState('');
+  const [cnfShowPassword, setCnfShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [mobileError, setMobileError] = useState('');
+  const [cnfPasswordError, setCnfPasswordError] = useState('');
 
-  const { signupWithEmailMobilePassword , loading} = useAuth();
+  const { signupWithEmailPassword , loading} = useAuth();
   const router = useRouter();
 
   const validateEmail = (email: string) => {
@@ -38,19 +37,21 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    setNameError('');
     setEmailError('');
     setPasswordError('');
-    setMobileError('')
+    setCnfPasswordError('');
 
-    if (!name) {
-      setNameError('Name is required');
-      return;
-    }
-    if (!mobile) {
-      setMobileError('Mobile is required');
-      return;
-    }
+    // const mobileRegex = /^[6-9]\d{9}$/;
+
+    // if (!mobile) {
+    //   setMobileError('Mobile is required');
+    //   return;
+    // }
+    
+    // if (!mobileRegex.test(mobile)) {
+    //   setMobileError('Enter valid mobile number');
+    //   return;
+    // }
 
     if (!email) {
       setEmailError('Email is required');
@@ -66,20 +67,24 @@ export default function RegisterScreen() {
       setPasswordError('Password is required');
       return;
     }
-
     if (!validatePassword(password)) {
       setPasswordError('Password must be at least 8 characters');
       return;
     }
+    if (!cnfPassword) {
+      setCnfPasswordError('Confirm password is required');
+      return;
+    }
+    if(password != cnfPassword){
+      setCnfPasswordError("Password not matched");
+      return ;
+    }
 
-    const { success ,error} = await signupWithEmailMobilePassword({
+    const { success ,error} = await signupWithEmailPassword({
       email,
       password,
-      name,
-      mobile
     });
     if (success) {
-      Alert.alert('Success', 'Registration successful!');
       router.push({
         pathname: '/(auth)/check-email',
         params: { email }
@@ -102,33 +107,6 @@ export default function RegisterScreen() {
               Create an account : NoterExam
             </Text>
             <View className="flex-1">
-              <InputNE
-                title='Name'
-                placeholder='Enter your name'
-                value={name}
-                onChangeText={(text: string) => {
-                  setName(text);
-                  setNameError('');
-                }
-                }
-                error={nameError}
-                keyboardType='numbers-and-punctuation'
-                isRequired
-              />
-              <InputNE
-                title='Mobile'
-                placeholder='Enter your mobile number'
-                value={mobile}
-                onChangeText={(text: string) => {
-                  setMobile(text);
-                  setMobileError('');
-                }
-                }
-                error={mobileError}
-                keyboardType='number-pad'
-                isRequired
-              />
-  
               <InputNE
                 title='Email'
                 placeholder='Enter your email'
@@ -156,6 +134,22 @@ export default function RegisterScreen() {
                 showPassword={showPassword}
                 onShowPasswordToggle={() => setShowPassword(!showPassword)}
                 error={passwordError}
+                postfixIcon
+              />
+              <InputNE
+                title='Confirm Password'
+                isRequired
+                type='password'
+                value={cnfPassword}
+                placeholder='Enter your confirm password'
+                onChangeText={(text: string) => {
+                  setCnfPassword(text);
+                  setCnfPasswordError('');
+                }
+                }
+                showPassword={cnfShowPassword}
+                onShowPasswordToggle={() => setCnfShowPassword(!cnfShowPassword)}
+                error={cnfPasswordError}
                 postfixIcon
               />
               <ButtonNE

@@ -50,29 +50,31 @@ const ProfileScreen = () => {
   }
 
   useEffect(() => {
-    setValue("name", user?.name)
-    setValue("email", user?.email)
-    setValue("mobile", user?.mobile)
-    setValue("profile_image", user?.profile_image || "")
-    setValue("type", user?.type || "student");
-    setValue("university", user?.university_id || "")
-    setValue("college", user?.college_id || "")
-    setValue("course", user?.course_id || "")
-    setValue("branch", user?.branch_year_semesters?.branch_id || "")
-    setValue("semester", user?.branch_year_semesters?.semester_id || "")
-    setValue("year", user?.branch_year_semesters?.year_id || "")
+    if(user?.name) {
+      setValue("name", user?.name)
+      setValue("email", user?.email)
+      setValue("mobile", user?.mobile)
+      setValue("profile_image", user?.profile_image || "")
+      setValue("type", user?.type || "student");
+      setValue("university", user?.university_id || "")
+      setValue("college", user?.college_id || "")
+      setValue("course", user?.course_id || "")
+      setValue("branch", user?.branch_year_semesters?.branch_id || "")
+      setValue("semester", user?.branch_year_semesters?.semester_id || "")
+      setValue("year", user?.branch_year_semesters?.year_id || "")
 
-    fetchUniversity();
-    fetchSemester();
-    fetchYear();
-    if(user?.college_id){
-      fetchCourse(user?.college_id)
-    }
-    if(user?.university_id){
-      fetchColleges(user?.university_id)
-    }
-    if(user?.course_id){
-      fetchBranches(user?.course_id)
+      fetchUniversity();
+      fetchSemester();
+      fetchYear();
+      if(user?.college_id){
+        fetchCourse(user?.college_id)
+      }
+      if(user?.university_id){
+        fetchColleges(user?.university_id)
+      }
+      if(user?.course_id){
+        fetchBranches(user?.course_id)
+      }
     }
   }, [isFocused])
 
@@ -80,7 +82,8 @@ const ProfileScreen = () => {
   const onSubmit = async (data: any) => {
     setLoading(true)
     try {
-      await updateProfile(data)
+      let hit = !!user?.name
+      await updateProfile(data,hit)
     } catch (err) {
       console.error(err);
     } finally {
