@@ -106,7 +106,6 @@ export default function HomeScreen() {
     { key: 'courseRelated' },
     { key: 'previousPapers' },
   ];
-  console.log(user)
 
   const renderSection = ({ item }: { item: { key: string } }) => {
     switch (item.key) {

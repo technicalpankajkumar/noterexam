@@ -15,7 +15,8 @@ export interface Profile {
   university?: string;
   year?: string;
   semester?: string;
-  type:'student' | 'admin' | 'coordinator'
+  type:'student' | 'admin' | 'coordinator',
+  become?:boolean
 }
 
 interface AuthContextType {
@@ -72,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         college_id,
         course_id,
         type,
+        become,
         branch_year_semesters_id,
         branch_year_semesters (
           id,
@@ -95,11 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .eq('id', userId)
       .single();
     if (data) {
-      // const { data: branch_year_semester_id, error: branchYearSemesterError } = await supabase
-      //   .from('branch_year_semesters')
-      //   .select('*')
-      //   .eq('id', data.branch_year_semesters_id)
-      //   .single();
+
       setUser(data);
       await SecureStore.setItemAsync('user', JSON.stringify(data));
     } else {
@@ -183,9 +181,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: error?.message || 'Signup failed' };
     }
     // Insert profile data
-    const { error: profileError } = await supabase.from('profiles').insert([
+    const { data: profileData,error: profileError } = await supabase.from('profiles').insert([
       { id: data.user.id, email, name, mobile },
     ]);
+    console.log({profileData})
     setLoading(false);
     if (profileError) return { success: false, error: profileError.message };
     await fetchProfile(data.user.id);

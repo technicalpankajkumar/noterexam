@@ -44,12 +44,12 @@ export default function ProfileScreen() {
   };
 
   const handleNavigate=()=>{
-     router.push("/profile")
+     router.push('/profile')
   }
 
   const menuItems = [
     { id: 1, title: 'Edit Profile', icon: Edit, onPress: () => handleNavigate()},
-    { id: 2, title: 'Become Coordinator', icon: UserPen, onPress: () => handleNavigate()},
+    { id: 2, title: 'Become Coordinator', icon: UserPen, onPress: () => router.push('/(coordinator)/form')},
     { id: 3, title: 'Settings', icon: Settings, onPress: () => console.log('Settings') },
     { id: 4, title: 'Notifications', icon: Bell, onPress: () => console.log('Notifications') },
     { id: 5, title: 'Privacy & Security', icon: Shield, onPress: () => console.log('Privacy') },
