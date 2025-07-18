@@ -79,9 +79,11 @@ export default function RegisterScreen() {
       mobile
     });
     if (success) {
-      Alert.alert('Success', 'Registration successful');
-      router.push('/(tabs)')
-      // router.push('/(auth)/verify-email');
+      Alert.alert('Success', 'Registration successful!');
+      router.push({
+        pathname: '/(auth)/check-email',
+        params: { email }
+      });
     } else {
       Alert.alert('Error', error);
     }

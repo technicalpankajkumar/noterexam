@@ -120,6 +120,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Alert.alert('Error!', error?.message || "Login Failed!")
         return { success: false};
       }
+       const { error: profileError } = await supabase.from('profiles').insert([
+      { id: data.user.id, email:data.user?.email, name:'pankajkumar', mobile:'9999999999' },
+      ]);
+      console.log({error})
       await fetchProfile(data.user.id);
       setLoading(false);
       return { success: true };
@@ -181,12 +185,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: error?.message || 'Signup failed' };
     }
     // Insert profile data
-    const { error: profileError } = await supabase.from('profiles').insert([
-      { id: data.user.id, email, name, mobile },
-    ]);
+    // const { error: profileError } = await supabase.from('profiles').insert([
+    //   { id: data.user.id, email, name, mobile },
+    // ]);
     setLoading(false);
-    if (profileError) return { success: false, error: profileError.message };
-    await fetchProfile(data.user.id);
+    // if (profileError) return { success: false, error: profileError.message };
+    // await fetchProfile(data.user.id);
     return { success: true };
   };
 

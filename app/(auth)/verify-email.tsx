@@ -1,8 +1,8 @@
+import ButtonNE from '@components/custom-ui/ButtonNE';
 import { Button, ButtonText } from '@components/ui/button';
-import { Input, InputField, InputIcon } from '@components/ui/input';
+import { Input, InputField } from '@components/ui/input';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
@@ -56,28 +56,21 @@ export default function VerifyEmailScreen() {
 
   return (
     <View className="flex-1 bg-white px-6 pt-28">
-      {/* Back button */}
-      <View className="absolute top-16 left-5 z-10">
-        <Button variant="link" action="secondary" onPress={() => router.back()}>
-          <InputIcon as={ChevronLeft} size="lg" color="$textDark900" />
-        </Button>
-      </View>
-
       {/* Content */}
-      <View className="flex-1 items-center space-y-6">
-        <Text className="text-[30px] font-bold text-zinc-800">Check your email</Text>
+      <View className="flex-1 ">
+        <Text className="text-3xl font-bold text-zinc-800 text-center">Check your email</Text>
         <Text className="text-base text-zinc-500 text-center">
-          We sent a verification link to sarah@cruz.com
+          We sent a verification link to your@gmail.com
         </Text>
 
         {/* OTP Input */}
-        <View className="justify-between w-full mt-6 mb-10 space-x-3">
+        <View className="justify-evenly w-full mt-6 mb-6 flex-row">
           {code.map((digit, index) => (
             <Input
               key={index}
               variant="outline"
               size="lg"
-              className="w-12 h-14 rounded-lg border border-zinc-300 text-center text-xl font-bold"
+              className="w-12 h-14 rounded-lg border border-blue-800 text-center text-xl font-bold"
             >
               <InputField
                 ref={(ref) => {
@@ -93,25 +86,17 @@ export default function VerifyEmailScreen() {
             </Input>
           ))}
         </View>
-
-        {/* Verify Button */}
-        <Button
-          className="w-full py-4 rounded-lg bg-[#4A90E2] mb-6"
-          isDisabled={loading}
+        <ButtonNE
+          className='w-full text-center'
+          loading={loading}
           onPress={handleVerify}
-        >
-          {loading ? (
-            <ButtonText className="text-white">Loading...</ButtonText>
-          ) : (
-            <ButtonText className="text-white font-semibold">Verify email</ButtonText>
-          )}
-        </Button>
-
+          title='Verify Email'
+        />
         {/* Resend link */}
         <View className="items-center">
           <Text className="text-sm text-zinc-500">Didn't receive the email? </Text>
-          <Button variant="link" onPress={() => {}}>
-            <ButtonText className="text-[#4A90E2] font-medium text-sm">Click to resend</ButtonText>
+          <Button variant="link" onPress={() => { }}>
+            <ButtonText className="text-blue-800 font-medium text-sm">Click to resend</ButtonText>
           </Button>
         </View>
       </View>

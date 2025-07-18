@@ -3,7 +3,7 @@ import { Bell, NotebookPen, Search, Undo2 } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
 
 
-export const Header = ({backButton = false ,searchControl,title='Noter Exam'}: {title?:string, backButton?: boolean,searchControl?:()=>void }) => {
+export const Header = ({backButton = false ,bellIcon=true,searchControl,title='Noter Exam'}: {title?:string,bellIcon?:boolean, backButton?: boolean,searchControl?:()=>void }) => {
     const router = useRouter();
     const back=()=>{
         router.back()
@@ -25,9 +25,9 @@ export const Header = ({backButton = false ,searchControl,title='Noter Exam'}: {
           >
             <Search size={24} color="#333" />
           </TouchableOpacity>}
-          <TouchableOpacity className="p-2">
+          {bellIcon && <TouchableOpacity className="p-2">
             <Bell size={24} color="#333" />
-          </TouchableOpacity>
+          </TouchableOpacity>}
         </View>
       </View>
   )
