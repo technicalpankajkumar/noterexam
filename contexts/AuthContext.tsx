@@ -181,10 +181,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: error?.message || 'Signup failed' };
     }
     // Insert profile data
-    const { data: profileData,error: profileError } = await supabase.from('profiles').insert([
+    const { error: profileError } = await supabase.from('profiles').insert([
       { id: data.user.id, email, name, mobile },
     ]);
-    console.log({profileData})
     setLoading(false);
     if (profileError) return { success: false, error: profileError.message };
     await fetchProfile(data.user.id);
