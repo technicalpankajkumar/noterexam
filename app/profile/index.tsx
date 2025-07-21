@@ -48,7 +48,6 @@ const ProfileScreen = () => {
     const data = await getYears(null);
     setYearData(data)
   }
-console.log(user)
   useEffect(() => {
     if(user?.name) {
       setValue("name", user?.name)
