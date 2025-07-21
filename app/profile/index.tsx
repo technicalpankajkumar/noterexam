@@ -48,11 +48,10 @@ const ProfileScreen = () => {
     const data = await getYears(null);
     setYearData(data)
   }
-
+console.log(user)
   useEffect(() => {
     if(user?.name) {
       setValue("name", user?.name)
-      setValue("email", user?.email)
       setValue("mobile", user?.mobile)
       setValue("profile_image", user?.profile_image || "")
       setValue("type", user?.type || "student");
@@ -62,25 +61,26 @@ const ProfileScreen = () => {
       setValue("branch", user?.branch_year_semesters?.branch_id || "")
       setValue("semester", user?.branch_year_semesters?.semester_id || "")
       setValue("year", user?.branch_year_semesters?.year_id || "")
-
-      fetchUniversity();
-      fetchSemester();
-      fetchYear();
-      if(user?.college_id){
-        fetchCourse(user?.college_id)
-      }
-      if(user?.university_id){
-        fetchColleges(user?.university_id)
-      }
-      if(user?.course_id){
-        fetchBranches(user?.course_id)
-      }
+    }
+    setValue("email", user?.email)
+    
+    fetchUniversity();
+    fetchSemester();
+    fetchYear();
+    if(user?.college_id){
+      fetchCourse(user?.college_id)
+    }
+    if(user?.university_id){
+      fetchColleges(user?.university_id)
+    }
+    if(user?.course_id){
+      fetchBranches(user?.course_id)
     }
   }, [isFocused])
 
 
   const onSubmit = async (data: any) => {
-    setLoading(true)
+    setLoading(true);
     try {
       let hit = !!user?.name
       await updateProfile(data,hit)
@@ -155,7 +155,7 @@ const ProfileScreen = () => {
                 onChangeText={onChange}
                 title="Name"
                 isRequired={true}
-                error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
+                error={typeof errors?.name?.message === 'string' ? errors.name.message : undefined}
               />
             )}
           />
@@ -167,12 +167,12 @@ const ProfileScreen = () => {
               <InputNE
                 placeholder="Enter your email"
                 type="text"
-                value={user?.email || value}
+                value={value}
                 onChangeText={onChange}
                 title="Email"
                 isRequired={true}
                 disabled
-                error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
+                error={typeof errors?.email?.message === 'string' ? errors.email.message : undefined}
               />
             )}
           />
@@ -188,7 +188,7 @@ const ProfileScreen = () => {
                 onChangeText={onChange}
                 title="Mobile"
                 isRequired={true}
-                error={typeof errors?.title?.message === 'string' ? errors.title.message : undefined}
+                error={typeof errors?.mobile?.message === 'string' ? errors.mobile.message : undefined}
               />
             )}
           />

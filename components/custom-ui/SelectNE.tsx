@@ -12,6 +12,7 @@ interface SelectNEProps {
     options?: { label: string, value: string }[];
     placeholder?:string;
     value?: string;
+    size?: "md" | "lg" | "sm"
 }
 const SelectNE: React.FC<SelectNEProps> = ({
     errorMsg,
@@ -21,12 +22,13 @@ const SelectNE: React.FC<SelectNEProps> = ({
     onChange,
     options =[],
     placeholder="Select option",
-    value
+    value,
+    size='lg'
 }) => {
     return (
         <FormControl
             isInvalid={!!error}
-            size="md"
+            size={size}
             isDisabled={false}
             isReadOnly={false}
             isRequired={false}

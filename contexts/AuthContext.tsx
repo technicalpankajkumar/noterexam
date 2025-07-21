@@ -95,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `)
       .eq('id', userId)
       .single();
+
     if (data) {
       setUser(data);
       await SecureStore.setItemAsync('user', JSON.stringify(data));
@@ -219,7 +220,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let response;
 
-    if (!hit) {
+    if (hit) {
       response = await action
         .update({
           name: profileData?.name,
