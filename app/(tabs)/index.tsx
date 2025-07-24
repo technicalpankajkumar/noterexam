@@ -87,10 +87,11 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetch();
+  }, [isFocused]);
+  useEffect(()=>{
     fetchCourseRelated();
     fetchExamPapers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFocused]);
+  },[])
 
   const searchControl = () => {
     router.push({ pathname: '/(tabs)/notes', params: { searchEnable: 1 } });
