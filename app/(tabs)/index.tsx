@@ -56,7 +56,7 @@ export default function HomeScreen() {
   const fetchCourseRelated = async () => {
     setCourseLoading(true);
     try {
-      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book", course_id: user?.course_id } });
+      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "book", course_id: user?.course_id || '' } });
       if (res.success) {
         setCourseRelatedData(res.data);
       } else {
@@ -68,7 +68,7 @@ export default function HomeScreen() {
       setCourseLoading(false);
     }
   };
-  // console.log(course_id)
+
   const fetchExamPapers = async () => {
     setExamLoading(true);
     try {
