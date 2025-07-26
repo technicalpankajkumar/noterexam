@@ -5,7 +5,7 @@ import {
   MoreHorizontal,
   Share
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Image,
   ScrollView,
@@ -15,54 +15,24 @@ import {
   View,
 } from 'react-native';
 
-export default function CommunityScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+import postByPic from "@assets/images/my_pic.jpg";
+export default function NewsScreen() {
 
   const posts = [
     {
       id: 1,
-      author: 'Sarah Wilson',
-      avatar:
-        'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
+      author: 'Pankaj Kumar',
+      avatar:postByPic,
       time: '2h ago',
       content:
-        'Just finished reading an amazing book about productivity! The insights on time management have completely changed my daily routine. Highly recommend it to anyone looking to optimize their workflow.',
+        'The News section is a new feature currently in development and will be available in a future update. Any previews, titles, or sample content displayed at this time are for illustrative purposes only and do not represent actual news content.',
       image:
         'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg',
       likes: 24,
       comments: 8,
       isLiked: false,
     },
-    {
-      id: 2,
-      author: 'Mike Johnson',
-      avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-      time: '4h ago',
-      content:
-        'Beautiful sunset from my morning hike today. Nature never fails to inspire and motivate me for the day ahead. Where is your favorite place to find inspiration?',
-      image:
-        'https://images.pexels.com/photos/36717/amazing-animal-beautiful-beautifull.jpg',
-      likes: 156,
-      comments: 23,
-      isLiked: true,
-    },
-    {
-      id: 3,
-      author: 'Emma Davis',
-      avatar:
-        'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-      time: '6h ago',
-      content:
-        'Excited to share my latest project! After months of hard work, we finally launched our new mobile app. The feedback has been incredible so far. Thank you to everyone who supported us on this journey!',
-      likes: 89,
-      comments: 31,
-      isLiked: false,
-    },
   ];
-
-  const categories = ['All', 'Popular', 'Recent', 'Following'];
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -70,40 +40,13 @@ export default function CommunityScreen() {
       {/* Header */}
       <Header/>
 
-      {/* Categories */}
-      <View className="bg-white pb-4">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 20 }}
-        >
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category}
-              className={`px-4 py-2 mr-3 rounded-full ${
-                selectedCategory === category ? 'bg-blue-500' : 'bg-gray-100'
-              }`}
-              onPress={() => setSelectedCategory(category)}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  selectedCategory === category ? 'text-white' : 'text-gray-600'
-                }`}
-              >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
       {/* Posts Feed */}
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
+      <ScrollView className="flex-1 mt-14" contentContainerStyle={{ padding: 10 }}>
         {posts.map((post) => (
           <View key={post.id} className="bg-white rounded-xl p-4 mb-4 shadow-sm">
             {/* Post Header */}
             <View className="flex-row items-center mb-3">
-              <Image source={{ uri: post.avatar }} className="w-10 h-10 rounded-full mr-3" />
+              <Image source={post.avatar} className="w-10 h-10 rounded-full mr-3" />
               <View className="flex-1">
                 <Text className="text-base font-semibold text-gray-800">
                   {post.author}

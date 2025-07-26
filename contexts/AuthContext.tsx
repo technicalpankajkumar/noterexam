@@ -9,12 +9,12 @@ export interface Profile {
   name: string;
   mobile: string;
   image?: string;
-  course?: string;
+  course_id?: string;
   branch?: string;
-  college?: string;
-  university?: string;
-  year?: string;
-  semester?: string;
+  college_id?: string;
+  university_id?: string;
+  year_id?: string;
+  semester_id?: string;
   type:'student' | 'admin' | 'coordinator',
   become?:boolean
 }

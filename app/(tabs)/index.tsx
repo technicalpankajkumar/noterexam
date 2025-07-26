@@ -72,7 +72,7 @@ export default function HomeScreen() {
   const fetchExamPapers = async () => {
     setExamLoading(true);
     try {
-      const res = await getBooksDetails({ page: 1, limit: 10, filters: { type: "prev_paper", course_id: user?.course_id } });
+      const res = await getBooksDetails({ page: 1, limit: 20, filters: { type: "prev_paper", course_id: user?.course_id } });
       if (res.success) {
         setExamPaperData(res.data);
       } else {
@@ -88,9 +88,12 @@ export default function HomeScreen() {
   useEffect(() => {
     fetch();
   }, [isFocused]);
+
   useEffect(()=>{
-    fetchCourseRelated();
-    fetchExamPapers();
+    if(user?.course_id){
+      fetchCourseRelated();
+      fetchExamPapers();
+    }
   },[])
 
   const searchControl = () => {

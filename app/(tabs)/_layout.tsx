@@ -28,8 +28,8 @@ export default function TabLayout() {
         options={{ title: 'Notes', tabBarIcon: ({ size, color }) => <FileText size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="community"
-        options={{ title: 'Community', tabBarIcon: ({ size, color }) => <Users size={size} color={color} /> }}
+        name="news"
+        options={{ title: 'News', tabBarIcon: ({ size, color }) => <Users size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="profile"

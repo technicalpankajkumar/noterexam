@@ -71,7 +71,7 @@ export default function NotesScreen() {
   useEffect(() => {
     setSearchEnable(localSearchEnable == '1' ? true : false);
     router.setParams({ searchEnable: 0 })
-    if (yearData?.length == 0 || semesterData?.length == 0) {
+    if (yearData?.length == 0 || semesterData?.length == 0 || clientParams.filters.semester_id != user?.semester_id || clientParams.filters.year_id != user?.year_id) {
       fetchSemester();
       fetchYear();
     }
