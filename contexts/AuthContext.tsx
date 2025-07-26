@@ -16,7 +16,8 @@ export interface Profile {
   year_id?: string;
   semester_id?: string;
   type:'student' | 'admin' | 'coordinator',
-  become?:boolean
+  become?:boolean,
+  branch_year_semesters?:any
 }
 
 interface AuthContextType {

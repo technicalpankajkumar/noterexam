@@ -48,7 +48,9 @@ export default function NotesScreen() {
     limit: 10,
     filters: {
       semester_id: user?.branch_year_semesters?.semester_id,
-      year_id: user?.branch_year_semesters?.year_id
+      year_id: user?.branch_year_semesters?.year_id,
+      course_id: user?.course_id,
+      type: "prev_paper",
     },
     searchTerm: ''
   })
@@ -71,9 +73,13 @@ export default function NotesScreen() {
   useEffect(() => {
     setSearchEnable(localSearchEnable == '1' ? true : false);
     router.setParams({ searchEnable: 0 })
-    if (yearData?.length == 0 || semesterData?.length == 0 || clientParams.filters.semester_id != user?.semester_id || clientParams.filters.year_id != user?.year_id) {
+    if (yearData?.length == 0 || semesterData?.length == 0) {
       fetchSemester();
       fetchYear();
+    }
+    if(user?.branch_year_semesters){
+      setSelectedYear(user?.branch_year_semesters?.year_id);
+      setSelectedSemester(user?.branch_year_semesters?.semester_id)
     }
   }, [isFocused]);
 
@@ -111,11 +117,11 @@ export default function NotesScreen() {
   const handleFilter = (value: string, name: string) => {
     if (name == 'year') {
       setSelectedYear(value);
-      setClientParams(pre => ({ ...pre, filters: { ...pre.filters, year_id: value } }))
+      setClientParams(pre => ({ ...pre, filters: { ...pre.filters, year_id: value,course_id: user?.course_id,type: "prev_paper", } }))
     }
     if (name == 'semester') {
       setSelectedSemester(value);
-      setClientParams(pre => ({ ...pre, filters: { ...pre.filters, semester_id: value } }))
+      setClientParams(pre => ({ ...pre, filters: { ...pre.filters, semester_id: value , course_id: user?.course_id,type: "prev_paper",} }))
     }
   }
 
