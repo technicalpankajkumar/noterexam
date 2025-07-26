@@ -46,7 +46,7 @@ export default function PDFViewer({ uri, loading }: { uri: string, loading?: boo
                 </TouchableOpacity>
                 <TouchableOpacity className='flex items-center' onPress={() => router.push('/(tabs)/community')}>
                     <Users size={24} color={'gray'} />
-                    <Text className='text-gray-500 font-medium text-sm'>Coummunity</Text>
+                    <Text className='text-gray-500 font-medium text-sm'>News</Text>
                 </TouchableOpacity>
                 <TouchableOpacity className='flex items-center' onPress={() => router.push('/(tabs)/profile')}>
                     <User size={24} color={'gray'} />
