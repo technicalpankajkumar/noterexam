@@ -353,7 +353,6 @@ $$ LANGUAGE plpgsql;
 
 
 ======================
-
 DROP FUNCTION fetch_doc_details_with_names(uuid,uuid,uuid,uuid,uuid,uuid,doc_type,text,integer,integer);
 
 CREATE OR REPLACE FUNCTION fetch_doc_details_with_names(
@@ -391,54 +390,162 @@ RETURNS TABLE (
   total_count BIGINT
 ) AS $$
 BEGIN
-  RETURN QUERY
-  SELECT 
-    d.id,
-    d.title,
-    d.description,
-    d.type,
-    d.document_url,
-    d.thumbnail_url,
-    
-    d.university_id,
-    u.name AS university_name,
-    
-    d.college_id,
-    clg.name AS college_name,
-    
-    d.course_id,
-    crs.name AS course_name,
-    
-    bys.branch_id,
-    br.name AS branch_name,
-    
-    bys.year_id,
-    y.name AS year_name,
-    
-    bys.semester_id,
-    s.name AS semester_name,
-    
-    d.created_at,
-    COUNT(*) OVER() AS total_count
-  FROM doc_details d
-  JOIN branch_year_semesters bys ON d.branch_year_semesters_id = bys.id
-  JOIN branches br ON br.id = bys.branch_id
-  JOIN years y ON y.id = bys.year_id
-  JOIN semesters s ON s.id = bys.semester_id
-  JOIN universities u ON u.id = d.university_id
-  JOIN colleges clg ON clg.id = d.college_id
-  JOIN courses crs ON crs.id = d.course_id
+  IF p_course_id IS NULL AND p_college_id IS NULL AND p_university_id IS NULL AND p_type = 'book' THEN
+    -- Return only "book" type documents, limit 20
+    RETURN QUERY
+    SELECT 
+      d.id,
+      d.title,
+      d.description,
+      d.type,
+      d.document_url,
+      d.thumbnail_url,
+      
+      d.university_id,
+      u.name AS university_name,
+      
+      d.college_id,
+      clg.name AS college_name,
+      
+      d.course_id,
+      crs.name AS course_name,
+      
+      bys.branch_id,
+      br.name AS branch_name,
+      
+      bys.year_id,
+      y.name AS year_name,
+      
+      bys.semester_id,
+      s.name AS semester_name,
+      
+      d.created_at,
+      COUNT(*) OVER() AS total_count
+    FROM doc_details d
+    JOIN branch_year_semesters bys ON d.branch_year_semesters_id = bys.id
+    JOIN branches br ON br.id = bys.branch_id
+    JOIN years y ON y.id = bys.year_id
+    JOIN semesters s ON s.id = bys.semester_id
+    JOIN universities u ON u.id = d.university_id
+    JOIN colleges clg ON clg.id = d.college_id
+    JOIN courses crs ON crs.id = d.course_id
+    WHERE d.type = 'book'
+    ORDER BY d.created_at DESC
+    LIMIT 20;
 
-  WHERE
-    (p_branch_id IS NULL OR bys.branch_id = p_branch_id) AND
-    (p_year_id IS NULL OR bys.year_id = p_year_id) AND
-    (p_semester_id IS NULL OR bys.semester_id = p_semester_id) AND
-    (p_university_id IS NULL OR d.university_id = p_university_id) AND
-    (p_college_id IS NULL OR d.college_id = p_college_id) AND
-    (p_course_id IS NULL OR d.course_id = p_course_id) AND
-    (p_type IS NULL OR d.type = p_type) AND
-    (p_search_term IS NULL OR d.title ILIKE '%' || p_search_term || '%')
-  ORDER BY d.created_at DESC
-  LIMIT p_limit OFFSET p_offset;
+  ELSE
+    -- Apply filters normally
+    RETURN QUERY
+    SELECT 
+      d.id,
+      d.title,
+      d.description,
+      d.type,
+      d.document_url,
+      d.thumbnail_url,
+      
+      d.university_id,
+      u.name AS university_name,
+      
+      d.college_id,
+      clg.name AS college_name,
+      
+      d.course_id,
+      crs.name AS course_name,
+      
+      bys.branch_id,
+      br.name AS branch_name,
+      
+      bys.year_id,
+      y.name AS year_name,
+      
+      bys.semester_id,
+      s.name AS semester_name,
+      
+      d.created_at,
+      COUNT(*) OVER() AS total_count
+    FROM doc_details d
+    JOIN branch_year_semesters bys ON d.branch_year_semesters_id = bys.id
+    JOIN branches br ON br.id = bys.branch_id
+    JOIN years y ON y.id = bys.year_id
+    JOIN semesters s ON s.id = bys.semester_id
+    JOIN universities u ON u.id = d.university_id
+    JOIN colleges clg ON clg.id = d.college_id
+    JOIN courses crs ON crs.id = d.course_id
+    WHERE
+      (p_branch_id IS NULL OR bys.branch_id = p_branch_id) AND
+      (p_year_id IS NULL OR bys.year_id = p_year_id) AND
+      (p_semester_id IS NULL OR bys.semester_id = p_semester_id) AND
+      (d.course_id = p_course_id OR d.college_id = p_college_id OR d.university_id = p_university_id) AND
+      (d.type = p_type) AND
+      (p_search_term IS NULL OR d.title ILIKE '%' || p_search_term || '%')
+    ORDER BY d.created_at DESC
+    LIMIT p_limit OFFSET p_offset;
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+----------------------
+
+-- DROP TABLE IF EXISTS profiles CASCADE;
+-- DROP TYPE IF EXISTS role;
+
+-- create type role as enum ('admin', 'student', 'coordinator');
+-- create table profiles (
+--   id uuid primary key references auth.users(id) on delete cascade,
+--   email text null,
+--   name text null,
+--   mobile text null,
+--   type role DEFAULT 'student',
+--   become boolean DEFAULT false,
+--   profile_image text,
+--   university_id uuid references universities(id),
+--   college_id uuid references colleges(id),
+--   course_id uuid references courses(id),
+--   branch_year_semesters_id uuid references branch_year_semesters(id),
+--   created_at timestamp with time zone default timezone('utc'::text, now())
+-- );
+
+-- View own profile or all if admin
+-- CREATE POLICY "Users can view profile"
+-- ON profiles
+-- FOR SELECT
+-- USING (
+--   auth.uid() = id OR
+--   EXISTS (
+--     SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.type = 'admin'
+--   )
+-- );
+
+-- -- Update own profile or all if admin
+-- CREATE POLICY "Users can update profile"
+-- ON profiles
+-- FOR UPDATE
+-- USING (
+--   auth.uid() = id OR
+--   EXISTS (
+--     SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.type = 'admin'
+--   )
+-- );
+
+-- -- Admin can delete any profile
+-- CREATE POLICY "Admins can delete profile"
+-- ON profiles
+-- FOR DELETE
+-- USING (
+--   EXISTS (
+--     SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.type = 'admin'
+--   )
+-- );
+
+
+CREATE OR REPLACE VIEW public.user_profiles AS
+SELECT
+  u.id AS auth_user_id,
+  u.email AS auth_email,
+  u.created_at AS auth_created_at,
+  p.*
+FROM auth.users u
+JOIN public.profiles p ON p.id = u.id;
