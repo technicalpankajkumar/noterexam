@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -102,10 +103,10 @@ export default function RegisterScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
           <View className="flex-1 px-6 pt-32 justify-center ">
-            <Text className="text-[30px] font-bold text-[#333] mb-2 text-center">Welcome Back</Text>
-            <Text className="text-base text-[#666] mb-8 text-center">
-              Create an account : NoterExam
-            </Text>
+          <View className='flex-row items-center gap-1 justify-center py-2 h-10 mb-10'>
+            <Image source={require('@assets/images/logo.png')} className='bg-cover text-center' />
+          </View>
+            
             <View className="flex-1">
               <InputNE
                 title='Email'

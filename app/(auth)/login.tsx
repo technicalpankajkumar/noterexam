@@ -2,9 +2,9 @@ import ButtonNE from '@components/custom-ui/ButtonNE';
 import InputNE from '@components/custom-ui/InputNE';
 import { useAuth } from '@contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { NotebookPen } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -65,10 +65,8 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
 
           <View className="flex-1 px-6 pt-32  justify-center "> 
-            <Text className="text-4xl font-bold text-[#333] mb-2 text-center">Welcome</Text>
-            <View className='flex-row items-center gap-1 justify-center py-2'>
-              <NotebookPen size={20} color={'#1e40af'} fontWeight={'bold'} />
-              <Text className="text-base font-bold text-blue-800">{'Noter Exam'}</Text>
+            <View className='flex-row items-center gap-1 justify-center py-2 h-10 mb-10'>
+              <Image source={require('@assets/images/logo.png')} className='bg-cover text-center' />
             </View>
 
             <View className="flex-1">
@@ -101,7 +99,7 @@ export default function LoginScreen() {
               />
 
               <View className="flex-row justify-end items-center mb-3">
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>router.push("/(auth)/forgot-password")}>
                   <Text className="text-base text-blue-800 font-medium">Forgot password</Text>
                 </TouchableOpacity>
               </View>

@@ -261,11 +261,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Reset password via email
   const resetPasswordWithEmail = async (email: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email,{
+    redirectTo: 'https://noterexam.com/reset-password', // 👈 Deep link to handle below
+    });
     setLoading(false);
     if (error) return { success: false, error: error.message };
     return { success: true };
-  };
+    };
 
   // Refresh profile
   const refreshProfile = async () => {
@@ -291,6 +293,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // alert('Verification email resent.');
     return { success: true, msg: "Verification email resent." };
   };
+
 
   // Provide all functions and user data globally
   const value: AuthContextType = {
