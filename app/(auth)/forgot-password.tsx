@@ -42,12 +42,11 @@ export default function ForgetPasswordScreen() {
         }
 
         let { success,error } = await resetPasswordWithEmail(email);
-        if (success) {
+        if (error) {
             Alert.alert('Error sending reset email:', error);
-            } else {
-                Alert.alert('Password reset email sent successfully.');
-                router.replace('/(auth)/reset-password');
-            }
+        } else {
+            Alert.alert('Password reset email sent successfully.');
+        }
     };
 
     return (

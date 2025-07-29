@@ -4,8 +4,7 @@ import { supabase } from '@lib/supabase';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
-import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ResetPasswordScreen() {
@@ -22,26 +21,50 @@ export default function ResetPasswordScreen() {
 
   useEffect(() => {
     const getTokenFromURL = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      if (initialUrl) {
-        const parsed = Linking.parse(initialUrl);
-        const tokenFromUrl = parsed.queryParams?.access_token;
-        if (typeof tokenFromUrl === 'string') {
-          setToken(tokenFromUrl);
+      const url = await Linking.getInitialURL();
+      console.log('Initial URL:', url);
+
+      if (url) {
+        const urlObj = new URL(url);
+        const hashParams = new URLSearchParams(urlObj.hash.substring(1)); // remove `#`
+
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        console.log('Access:', accessToken);
+        console.log('Refresh:', refreshToken);
+
+        if (accessToken && refreshToken) {
+          setToken(accessToken)
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error('❌ setSession error:', error.message);
+          } else {
+            console.log('✅ Session restored:', data.session?.user);
+          }
         }
       }
+
+      // Check session
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log('🔐 Current session:', sessionData.session);
     };
+
     getTokenFromURL();
   }, []);
 
-  let validatePassword=(password: string) => {
+
+  let validatePassword = (password: string) => {
     return password.length >= 8;
   };
 
   const handleReset = async () => {
     setPasswordError('');
     setCnfPasswordError('');
-    setLoading(true);
 
     if (!password) {
       setPasswordError('Password is required');
@@ -56,10 +79,11 @@ export default function ResetPasswordScreen() {
       setCnfPasswordError('Confirm password is required');
       return;
     }
-    if(password != cnfPassword){
+    if (password != cnfPassword) {
       setCnfPasswordError("Password not matched");
-      return ;
+      return;
     }
+    setLoading(true);
 
     const { data, error } = await supabase.auth.updateUser({ password });
 
@@ -87,11 +111,11 @@ export default function ResetPasswordScreen() {
 
             <View className="flex-1">
               <InputNE
-                title='Password'
+                title='New Password'
                 isRequired
                 type='password'
                 value={password}
-                placeholder='Enter your password'
+                placeholder='Enter your new password'
                 onChangeText={(text: string) => {
                   setPassword(text);
                   setPasswordError('');
@@ -118,8 +142,7 @@ export default function ResetPasswordScreen() {
                 error={cnfPasswordError}
                 postfixIcon
               />
-
-
+              {message ? <Text className='text-red-600'>{message}</Text> : null}
               <View className="flex-row justify-end items-center mb-3">
                 <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
                   <Text className="text-base text-blue-800 font-medium">I remember my password</Text>
@@ -128,10 +151,9 @@ export default function ResetPasswordScreen() {
               <ButtonNE
                 onPress={handleReset}
                 loading={loading}
-                title='Reset Password'
+                title='Update Password'
                 disabled={!token}
               />
-              {message ? <Text style={{ marginTop: 10 }}>{message}</Text> : null}
               <View className="flex-row justify-center items-center">
                 <Text className="text-[#666] text-base">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
@@ -144,4 +166,5 @@ export default function ResetPasswordScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
 
-  );}
+  );
+}
