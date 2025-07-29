@@ -262,7 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPasswordWithEmail = async (email: string) => {
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo: 'https://noterexam.com/reset-password', // 👈 Deep link to handle below
+    redirectTo: 'noterexam://(auth)/reset-password', // 👈 Deep link to handle below
     });
     setLoading(false);
     if (error) return { success: false, error: error.message };

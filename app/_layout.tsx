@@ -1,14 +1,38 @@
 import { GluestackUIProvider } from "@components/ui/gluestack-ui-provider";
 import { AuthProvider } from "@contexts/AuthContext";
-import { Stack } from "expo-router";
-import { useState } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Linking, StatusBar, Text, View } from "react-native";
 import NetworkLogger from 'react-native-network-logger';
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
 export default function RootLayout() {
-  const [toggle,setToggle] = useState(false)
+  const [toggle,setToggle] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleDeepLink = ({ url }: { url: string }) => {
+      const path = url.replace(/.*?:\/\//g, '');
+
+      if (path.startsWith('(auth)/reset-password')) {
+        router.push('/(auth)/reset-password');
+      }
+    };
+
+    Linking.addEventListener('url', handleDeepLink);
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    return () => {
+      Linking.removeAllListeners('url');
+    };
+  }, []);
+
   return <GluestackUIProvider>
     <AuthProvider>
       <SafeAreaView className='flex-1 relative'>

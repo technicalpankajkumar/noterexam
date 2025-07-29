@@ -21,9 +21,9 @@ export default function RegisterScreen() {
   const [cnfPassword, setCnfPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [cnfShowPassword, setCnfShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [cnfPasswordError, setCnfPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const { signupWithEmailPassword , loading} = useAuth();
   const router = useRouter();
